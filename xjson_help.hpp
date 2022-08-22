@@ -1,7 +1,7 @@
 #pragma once
 #include "json.hpp"
-#include "com.hpp"
-#include "file.hpp"
+#include "xcom.hpp"
+#include "xfile.hpp"
 
 using namespace std;
 using namespace nlohmann;

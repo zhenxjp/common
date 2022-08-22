@@ -1,6 +1,6 @@
 #pragma once
 
-#include "com.hpp"
+#include "xcom.hpp"
 
 #define SAMECHAR(a, b) (((a) | 0x20) == ((b) | 0x20))
 

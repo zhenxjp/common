@@ -1,6 +1,6 @@
 #pragma once
-#include "com.hpp"
-#include "str.hpp"
+#include "xcom.hpp"
+#include "xstr.hpp"
 
 static void xfile_del(const char *path)
 {
