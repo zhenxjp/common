@@ -8,3 +8,5 @@
 #include "xstr.hpp"
 #include "xtime.hpp"
 #include "xrb.hpp"
+#include "xee.hpp"
+#include "xsock.hpp"

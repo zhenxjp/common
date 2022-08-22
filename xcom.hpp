@@ -41,6 +41,8 @@ typedef const char* c_t;
 typedef unsigned int ip_t;
 typedef unsigned short port_t;
 //////////////////////////////
+#define invalid_sock -1
+//////////////////////////////
 
 static bool _xxx_printf = true;
 #define X_P_INFO  \
@@ -50,7 +52,7 @@ static bool _xxx_printf = true;
     }
 	
 #define CHECK_RETV(value, ret) if (0 == (value)){X_P_INFO;return (ret);};
-#define CHECK_RET(value, ret) if (0 == (value)){X_P_INFO;return ;};
+#define CHECK_RET(value) if (0 == (value)){X_P_INFO;return ;};
 
 //////////////////////////////
 static bool cpu_bind(pthread_t th,int32_t cpu_idx)
