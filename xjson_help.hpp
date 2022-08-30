@@ -19,9 +19,9 @@ static json json_from_file(c_t path)
     return json_from_mem(mem.c_str());
 }
 
-static string json_to_mem(json j)
+static string json_to_mem(json j,int indent = 1)
 {
-    return to_string(j);
+    return j.dump(indent);
 }
 
 static bool json_to_file(json j,c_t path)
