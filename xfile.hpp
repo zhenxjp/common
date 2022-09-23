@@ -61,6 +61,11 @@ static int xfile_write_new(const char *pFile, const char *p, size_t nLen)
 	return xfile_write_append(pFile, p, nLen, 0);
 }
 
+static int xfile_write_new_str(const char *pFile, const string &str)
+{
+	return xfile_write_new(pFile, str.c_str(), str.size());
+}
+
 static vector<string> xfile_read_lines(const char *pPath)
 {
 	string all = xfile_read(pPath);

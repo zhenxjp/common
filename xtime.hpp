@@ -22,9 +22,10 @@ static string get_tm_date_str(tm *tt)
     return ss.str();
 }
 
-static string get_now_date_str()
+static string get_now_date_str(int diff_day = 0)
 {
     time_t now = time(nullptr);
+    now -= diff_day*24*3600;
     tm *tt= localtime(&now);
     return get_tm_date_str(tt);
 }
@@ -40,4 +41,19 @@ static string get_tm_str(tm *tt)
     return ss.str();
 }
 
+static string get_tm_str2(tm *tt)
+{
+    stringstream ss;
+    ss<<1900+tt->tm_year<<"-"<<1+tt->tm_mon<<"-"<<tt->tm_mday
+        <<"__"
+        <<tt->tm_hour<<"_"<<tt->tm_min<<"_"<<tt->tm_sec;
+    return ss.str();
+}
+
+static string get_now_str2()
+{
+    time_t now = time(nullptr);
+    tm *tt= localtime(&now);
+    return get_tm_str2(tt);
+}
 
