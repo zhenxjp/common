@@ -15,6 +15,7 @@ static uint64_t get_ns()
     return std::chrono::high_resolution_clock::now().time_since_epoch().count();
 }
 
+// get "yyyy-mm-dd" by tm
 static string get_tm_date_str(tm *tt)
 {
     stringstream ss;
@@ -22,6 +23,7 @@ static string get_tm_date_str(tm *tt)
     return ss.str();
 }
 
+// get "yyyy-mm-dd" by now
 static string get_now_date_str(int diff_day = 0)
 {
     time_t now = time(nullptr);
@@ -31,7 +33,7 @@ static string get_now_date_str(int diff_day = 0)
 }
 
 
-
+// get "yyyy-mm-dd hh:mm:ss" bt tm
 static string get_tm_str(tm *tt)
 {
     stringstream ss;
@@ -41,6 +43,7 @@ static string get_tm_str(tm *tt)
     return ss.str();
 }
 
+// get "yyyy-mm-dd__hh_mm_ss" by tm
 static string get_tm_str2(tm *tt)
 {
     stringstream ss;
@@ -50,6 +53,7 @@ static string get_tm_str2(tm *tt)
     return ss.str();
 }
 
+// get "yyyy-mm-dd__hh_mm_ss" by now
 static string get_now_str2()
 {
     time_t now = time(nullptr);
