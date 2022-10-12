@@ -19,9 +19,13 @@ static uint64_t get_ns()
 // get "yyyy-mm-dd" by tm
 static string get_tm_date_str(tm *tt)
 {
-    stringstream ss;
-    ss<<1900+tt->tm_year<<"-"<<1+tt->tm_mon<<"-"<<tt->tm_mday;
-    return ss.str();
+    char temp[100]  = {0};
+    sprintf(temp,"%d-%02d-%02d",
+        1900+tt->tm_year,
+        1+tt->tm_mon,
+        tt->tm_mday);
+
+    return temp;
 }
 
 // get "yyyy-mm-dd" by now
