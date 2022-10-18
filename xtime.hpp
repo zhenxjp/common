@@ -28,15 +28,20 @@ static uint64_t get_ns()
 class xx_time
 {
 public:
-    xx_time()
+    explicit xx_time()
     {
         clean();
     }
-    xx_time(const string& str,c_t format = XX_DATE_TIME_FORMAT)
+    explicit xx_time(const string& str,c_t format = XX_DATE_TIME_FORMAT)
     {
         init(str.c_str(),format);
     }
-    xx_time(time_t t)
+    explicit xx_time(const string& str,int diff,c_t format = XX_DATE_TIME_FORMAT)
+    {
+        init(str.c_str(),format);
+        day_diff(diff);
+    }
+    explicit xx_time(time_t t)
     {
         init(t);
     }
