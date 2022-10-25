@@ -194,8 +194,40 @@ static int get_utf8_cnt(const string &str)
     return wstr.length();
 }
 
+static unsigned char ToHex(unsigned char x) 
+{ 
+    return  x > 9 ? x + 55 : x + 48; 
+}
+static string get_url_encode(string str)
+{
+    std::string strTemp = "";
+    size_t length = str.length();
+    for (size_t i = 0; i < length; i++)
+    {
+        if (isalnum((unsigned char)str[i]) || 
+            (str[i] == '-') ||
+            (str[i] == '_') || 
+            (str[i] == '.') || 
+            (str[i] == '~'))
+            strTemp += str[i];
+        else if (str[i] == ' ')
+            strTemp += "+";
+        else
+        {
+            strTemp += '%';
+            strTemp += ToHex((unsigned char)str[i] >> 4);
+            strTemp += ToHex((unsigned char)str[i] % 16);
+        }
+    }
+    return strTemp;
+}
+
+
+
 static void test_str()
 {
+    cout<< get_url_encode("啦啦啦")<<endl;
+
     wstring dd = L"你好";
     string ddbytes = utf8_encode(dd); // 按照UTF8格式进行编码，转为常规string，即得到UTF8格式的字节流
 
@@ -204,5 +236,7 @@ static void test_str()
     const char *buf = "xxx1111yyy";
     string s = find_str(buf, "xxx", "yyy");
     cout << s << endl;
+
+    
     exit(0);
 }
