@@ -95,7 +95,9 @@ static string xmerge(const vector<string> &strs, const string &pattern)
     return ret;
 }
 
-static string delete_html_tag(string ori_buf)
+
+
+static string delete_tag(string ori_buf,char left,char right)
 {
     string txt_buf;
     bool in = false;
@@ -105,14 +107,14 @@ static string delete_html_tag(string ori_buf)
 
         if (in)
         {
-            if ('>' == c)
+            if (right == c)
             {
                 in = false;
             }
         }
         else
         {
-            if ('<' == c)
+            if (left == c)
             {
                 in = true;
             }
@@ -124,6 +126,11 @@ static string delete_html_tag(string ori_buf)
     }
 
     return txt_buf;
+}
+
+static string delete_html_tag(string ori_buf)
+{
+    return delete_tag(ori_buf,'<','>');
 }
 
 static int replace_all(std::string &str, const std::string &old_value, const std::string &new_value)

@@ -40,3 +40,17 @@ static json json_merge(vector<json> &all)
     }
     return all_one;
 }
+
+static map<string,string> json_get_map(json j)
+{
+    map<string,string> ret;
+    auto jsons = j.get<vector<json>>();
+    for(auto xx:jsons)
+    {
+        auto r_keys = xx.get<vector<string>>();
+        string old_val = r_keys[0];
+        string new_val = r_keys[1];
+        ret[old_val] = new_val;
+    }
+    return ret;
+}
