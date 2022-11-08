@@ -38,9 +38,22 @@ static int64_t xx_get_arg_i64(int argc, char** argv, c_t key,int64_t default_ret
     return atoll(argv[idx + 1]);
 }
 
+
+
+
+
 #define xx_arg_have(key)  (-1 != xx_get_argidx(argc,argv,key))
-#define xx_arg_str(key)   (xx_get_arg(argc,argv,key))
-#define xx_arg_int(key)   (xx_get_arg_i64(argc,argv,key))
+
+void xx_check_arg(int argc, char** argv, c_t key)
+{
+	if(!xx_arg_have(key))
+	{
+		printf("need arg %s\n",key);
+		exit(0);
+	}
+}
+#define xx_arg_str(key)   (xx_check_arg(argc,argv,key),xx_get_arg(argc,argv,key))
+#define xx_arg_int(key)   (xx_check_arg(argc,argv,key),xx_get_arg_i64(argc,argv,key))
 
 #define xx_arg_str_default(key,default_ret)   (xx_get_arg(argc,argv,key,default_ret))
 #define xx_arg_int_default(key,default_ret)   (xx_get_arg_i64(argc,argv,key,default_ret))
