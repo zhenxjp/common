@@ -2,14 +2,14 @@
 #include "xcom.hpp"
 #include "xstr.hpp"
 
-static void xfile_del(const char *path)
+static void xfile_del(string path)
 {
-	remove(path);
+	remove(path.c_str());
 }
 
-static long xfile_get_size(const char *pPath)
+static long xfile_get_size(string path)
 {
-	FILE *p = fopen(pPath, "r");
+	FILE *p = fopen(path.c_str(), "r");
 	CHECK_RETV(NULL != p, -1);
 
 	fseek(p, 0, SEEK_END);
@@ -18,19 +18,19 @@ static long xfile_get_size(const char *pPath)
 	return lRet;
 }
 
-static string xfile_read(const char *pPath)
+static string xfile_read(string path)
 {
-	long len = xfile_get_size(pPath);
+	long len = xfile_get_size(path);
 	if (len < 0)
 	{
-		printf("xfile_read err,file=%s,err=%d\n", pPath, errno);
+		printf("xfile_read err,file=%s,err=%d\n", path.c_str(), errno);
 		return "";
 	}
 
 	string ss;
 	ss.resize(len);
 
-	FILE *p = fopen(pPath, "rb");
+	FILE *p = fopen(path.c_str(), "rb");
 	CHECK_RETV(NULL != p, "");
 
 	size_t ret = fread(&ss[0], 1, len, p);
@@ -38,13 +38,13 @@ static string xfile_read(const char *pPath)
 	return ss;
 }
 
-static int xfile_write_append(const char *pFile, const char *p, size_t nLen, int32_t nOff = 0)
+static int xfile_write_append(string path, const char *p, size_t nLen, int32_t nOff = 0)
 {
 	FILE *PF;
-	PF = fopen(pFile, "ab+");
+	PF = fopen(path.c_str(), "ab+");
 	if (nullptr == PF)
 	{
-		printf("xfile_read err,file=%s,err=%d\n", pFile, errno);
+		printf("xfile_read err,file=%s,err=%d\n", path.c_str(), errno);
 		return 0;
 	}
 	CHECK_RETV(0 == fseek(PF, nOff, SEEK_SET), -1);
@@ -55,51 +55,49 @@ static int xfile_write_append(const char *pFile, const char *p, size_t nLen, int
 	return 0;
 }
 
-static int xfile_write_new(const char *pFile, const char *p, size_t nLen)
+static int xfile_write_new(string path, const char *p, size_t nLen)
 {
-	xfile_del(pFile);
-	return xfile_write_append(pFile, p, nLen, 0);
+	xfile_del(path);
+	return xfile_write_append(path, p, nLen, 0);
 }
 
-static int xfile_write_new_str(const char *pFile, const string &str)
+static int xfile_write_new_str(string path, const string &str)
 {
-	return xfile_write_new(pFile, str.c_str(), str.size());
+	return xfile_write_new(path, str.c_str(), str.size());
 }
 
-static vector<string> xfile_read_lines(const char *pPath)
+static vector<string> xfile_read_lines(string path)
 {
-	string all = xfile_read(pPath);
+	string all = xfile_read(path);
 	vector<string> lines = xsplit(all, "\n");
 	return lines;
 }
 
-static int xfile_xfile_write_lines(const char *pFile, vector<string> lines)
+static int xfile_xfile_write_lines(string path, vector<string> lines)
 {
 	string all = xmerge(lines, "\n");
-	return xfile_write_new(pFile, all.c_str(), all.length());
+	return xfile_write_new(path, all.c_str(), all.length());
 }
 
-static bool xfile_create_foder(c_t path)
+static bool xfile_create_foder(string path)
 {
 	bool ret = std::filesystem::create_directories(path);
 	return ret;
 }
 
-static bool xfile_exists(c_t path)
+static bool xfile_exists(string path)
 {
 	bool ret = std::filesystem::exists(path);
 	return ret;
 }
 
-static vector<string> xfile_files_in_dir(c_t path, bool recursive = false)
+static vector<string> xfile_files_in_dir(string path, bool recursive = false)
 {
 	vector<string> ret;
 	if (recursive)
 	{
 		for (auto const &dir_entry : fs::recursive_directory_iterator(path))
 		{
-			string path = dir_entry.path();
-			//path = path.substr(1,path.length() - 2);
 			ret.push_back(dir_entry.path());
 		}
 	}
@@ -107,8 +105,6 @@ static vector<string> xfile_files_in_dir(c_t path, bool recursive = false)
 	{
 		for (auto const &dir_entry : fs::directory_iterator(path))
 		{
-			string path = dir_entry.path();
-			//path = path.substr(1,path.length() - 2);
 			ret.push_back(dir_entry.path());
 		}
 	}
