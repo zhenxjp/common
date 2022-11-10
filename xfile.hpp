@@ -98,14 +98,16 @@ static vector<string> xfile_files_in_dir(string path, bool recursive = false)
 	{
 		for (auto const &dir_entry : fs::recursive_directory_iterator(path))
 		{
-			ret.push_back(dir_entry.path());
+			if(dir_entry.is_regular_file())
+				ret.push_back(dir_entry.path());
 		}
 	}
 	else
 	{
 		for (auto const &dir_entry : fs::directory_iterator(path))
 		{
-			ret.push_back(dir_entry.path());
+			if(dir_entry.is_regular_file())
+				ret.push_back(dir_entry.path());
 		}
 	}
 

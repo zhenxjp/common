@@ -172,6 +172,26 @@ static int replace_all2(std::string &str, const std::string &old_value, const st
     return find_cnt;
 }
 
+static int find_str_cnt(const std::string &str, const std::string &key)
+{
+    int find_cnt = 0;
+    std::string::size_type pos(0);
+    while (true)
+    {
+        
+        if ((pos = str.find(key,pos)) != std::string::npos)
+        {
+            ++find_cnt;
+            pos += key.size();
+        }
+        else
+        {
+            break;
+        }
+    }
+    return find_cnt;
+}
+
 #include <locale>
 #include <codecvt>
 
