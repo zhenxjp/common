@@ -13,7 +13,7 @@ static json json_from_mem(c_t mem)
     return j;
 }
 
-static json json_from_file(c_t path)
+static json json_from_file(string path)
 {
     string mem = xfile_read(path);
     return json_from_mem(mem.c_str());

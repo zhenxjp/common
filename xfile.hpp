@@ -113,3 +113,26 @@ static vector<string> xfile_files_in_dir(string path, bool recursive = false)
 
 	return ret;
 }
+
+static vector<string> xfile_dirss_in_dir(string path, bool recursive = false)
+{
+	vector<string> ret;
+	if (recursive)
+	{
+		for (auto const &dir_entry : fs::recursive_directory_iterator(path))
+		{
+			if(dir_entry.is_directory())
+				ret.push_back(dir_entry.path());
+		}
+	}
+	else
+	{
+		for (auto const &dir_entry : fs::directory_iterator(path))
+		{
+			if(dir_entry.is_directory())
+				ret.push_back(dir_entry.path());
+		}
+	}
+
+	return ret;
+}
