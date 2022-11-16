@@ -136,3 +136,21 @@ static vector<string> xfile_dirss_in_dir(string path, bool recursive = false)
 
 	return ret;
 }
+
+
+static string xfile_fix_foder(string &foder)
+{
+	if(foder.empty())
+	{
+		foder = "./";
+	}else
+	{
+		if(foder[foder.size() - 1] != '/')
+		{
+			foder += "/";
+		}
+	}
+	return foder;
+		
+	
+}
