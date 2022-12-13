@@ -45,7 +45,7 @@ static const char *xstrstr(const char *pSrc, const char *pDst, bool bCaseSensiti
     return NULL;
 }
 
-static string find_str(const char *buf, const char *key1, const char *key2)
+static string find_str_ex(const char *&buf, const char *key1, const char *key2)
 {
     const char *find1 = xstrstr(buf, key1);
     const char *find2 = xstrstr(find1, key2);
@@ -57,7 +57,28 @@ static string find_str(const char *buf, const char *key1, const char *key2)
     const char *begin = find1 + strlen(key1);
     int diff = find2 - find1;
     int len = diff - strlen(key1);
+
+    buf = find2 + strlen(key2);
     return string(begin, len);
+}
+
+static string find_str(const char *buf, const char *key1, const char *key2)
+{
+    const char *temp = buf;
+    return find_str_ex(temp,key1,key2);
+}
+
+static vector<string> find_strs(const char *buf, const char *key1, const char *key2)
+{
+    vector<string> ret;
+    while(true)
+    {
+        string one = find_str_ex(buf,key1,key2);
+        if(one.empty())
+            break;
+        ret.push_back(one);
+    }
+    return ret;
 }
 
 static vector<string> xsplit(const string &str, const string &pattern)
