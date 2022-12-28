@@ -88,19 +88,35 @@ static vector<string> xsplit(const string &str, const string &pattern)
     {
         return resVec;
     }
+
     //方便截取最后一段数据
     string strs = str + pattern;
 
-    size_t pos = strs.find(pattern);
-    size_t size = strs.size();
-    while (pos != string::npos)
+    size_t pos_last = 0;
+    while(true)
     {
-        string x = strs.substr(0, pos);
-        resVec.push_back(x);
-        strs = strs.substr(pos + 1, size);
-        pos = strs.find(pattern);
+        size_t pos_find = strs.find(pattern,pos_last);
+        if(string::npos == pos_find)
+        {
+            break;
+        }
+        string find = strs.substr(pos_last,pos_find-pos_last);
+        if(!find.empty())
+        {
+            resVec.push_back(find);
+        }
+        
+        pos_last = pos_find + pattern.size();   
     }
-
+    if(pos_last < str.size())
+    {
+        string last = str.substr(pos_last,str.size()-pos_last);
+        if(!last.empty())
+        {
+            resVec.push_back(last);
+        }
+        
+    }
     return resVec;
 }
 
@@ -270,7 +286,38 @@ static string get_url_encode(string str)
     return strTemp;
 }
 
+static void test_str_xsplit_one(string all,string part)
+{
+    auto ret = xsplit(all,part);
+    cout<<"=========="<<endl;
+    cout<<"all="<<all<<endl;
+    cout<<"part="<<part<<endl;
+    cout<<ret.size()<<endl;
+    
+    for(auto it:ret)
+    {
+        cout<<it<<endl;
+    }
+}
+static void test_str_xsplit()
+{
+    test_str_xsplit_one("##aaa##","##");
+    test_str_xsplit_one("aaa##","##");
+    test_str_xsplit_one("##aaa","##");
+    test_str_xsplit_one("aaa","##");
 
+    test_str_xsplit_one("aaa##bbb","##");
+    test_str_xsplit_one("##aaa##bbb","##");
+    test_str_xsplit_one("aaa##bbb##","##");
+    test_str_xsplit_one("##aaa##bbb##","##");
+
+    test_str_xsplit_one("aaa##bbb##ccc","##");
+    test_str_xsplit_one("##aaa##bbb##ccc","##");
+    test_str_xsplit_one("aaa##bbb##ccc##","##");
+    test_str_xsplit_one("##haaa##bbb##ccc##","##");
+
+
+}
 
 static void test_str()
 {
