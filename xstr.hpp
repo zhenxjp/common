@@ -286,6 +286,40 @@ static string get_url_encode(string str)
     return strTemp;
 }
 
+static bool str_ends_with(const string &str,const string & x)
+{
+    if(str.size() < x.size())
+        return false;
+
+    string temp = str.substr(str.size() - x.size(),x.size());
+    return temp == x;
+}
+
+static bool str_start_with(const string &str,const string & x)
+{
+    if(str.size() < x.size())
+        return false;
+
+    string temp = str.substr(0,x.size());
+    return temp == x;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+
+
+static void test_str_with()
+{
+    cout<<str_start_with("aaabbbccc","aaa")<<endl;;
+    cout<<str_start_with("aaabbbccc","aa")<<endl;;
+    cout<<str_start_with("aaabbbccc","aab")<<endl;;
+
+    cout<<str_ends_with("aaabbbccc","ccc")<<endl;;
+    cout<<str_ends_with("aaabbbccc","cc")<<endl;;
+    cout<<str_ends_with("aaabbbccc","cbc")<<endl;;
+    cout<<"===================="<<endl;
+
+}
 static void test_str_xsplit_one(string all,string part)
 {
     auto ret = xsplit(all,part);
@@ -299,6 +333,8 @@ static void test_str_xsplit_one(string all,string part)
         cout<<it<<endl;
     }
 }
+
+
 static void test_str_xsplit()
 {
     test_str_xsplit_one("##aaa##","##");

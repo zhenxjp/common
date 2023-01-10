@@ -73,6 +73,24 @@ static vector<string> xfile_read_lines(string path)
 	return lines;
 }
 
+static string xfile_fix_foder(string &foder)
+{
+	if(foder.empty())
+	{
+		foder = "./";
+	}else
+	{
+		if(foder[foder.size() - 1] != '/')
+		{
+			foder += "/";
+		}
+	}
+	return foder;
+}
+//////////////////////////////////////////////////////////////////////////
+#include <filesystem>
+namespace fs = std::filesystem;
+
 static int xfile_xfile_write_lines(string path, vector<string> lines)
 {
 	string all = xmerge(lines, "\n");
@@ -81,13 +99,13 @@ static int xfile_xfile_write_lines(string path, vector<string> lines)
 
 static bool xfile_create_foder(string path)
 {
-	bool ret = std::filesystem::create_directories(path);
+	bool ret = fs::create_directories(path);
 	return ret;
 }
 
 static bool xfile_exists(string path)
 {
-	bool ret = std::filesystem::exists(path);
+	bool ret = fs::exists(path);
 	return ret;
 }
 
@@ -137,20 +155,3 @@ static vector<string> xfile_dirss_in_dir(string path, bool recursive = false)
 	return ret;
 }
 
-
-static string xfile_fix_foder(string &foder)
-{
-	if(foder.empty())
-	{
-		foder = "./";
-	}else
-	{
-		if(foder[foder.size() - 1] != '/')
-		{
-			foder += "/";
-		}
-	}
-	return foder;
-		
-	
-}

@@ -5,7 +5,7 @@
 #include <thread>
 #include <chrono>
 #include <set>
-#include <filesystem>
+
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -34,7 +34,7 @@
 #include <signal.h>
 //////////////////////////////
 using namespace std;
-namespace fs = std::filesystem;
+
 //////////////////////////////
 #define X_ARRAY_CNT(v)	(sizeof(v)/sizeof((v)[0]))
 //////////////////////////////
