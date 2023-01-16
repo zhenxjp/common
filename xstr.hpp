@@ -295,7 +295,7 @@ static bool str_ends_with(const string &str,const string & x)
     return temp == x;
 }
 
-static bool str_start_with(const string &str,const string & x)
+static bool str_starts_with(const string &str,const string & x)
 {
     if(str.size() < x.size())
         return false;
@@ -310,9 +310,9 @@ static bool str_start_with(const string &str,const string & x)
 
 static void test_str_with()
 {
-    cout<<str_start_with("aaabbbccc","aaa")<<endl;;
-    cout<<str_start_with("aaabbbccc","aa")<<endl;;
-    cout<<str_start_with("aaabbbccc","aab")<<endl;;
+    cout<<str_starts_with("aaabbbccc","aaa")<<endl;;
+    cout<<str_starts_with("aaabbbccc","aa")<<endl;;
+    cout<<str_starts_with("aaabbbccc","aab")<<endl;;
 
     cout<<str_ends_with("aaabbbccc","ccc")<<endl;;
     cout<<str_ends_with("aaabbbccc","cc")<<endl;;
