@@ -18,3 +18,4 @@
 #include "xasm.hpp"
 #include "xasmex.hpp"
 #include "xhook.hpp"
+#include "anti_debug.hpp"
