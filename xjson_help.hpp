@@ -54,3 +54,17 @@ static map<string,string> json_get_map(json j)
     }
     return ret;
 }
+
+template<class KEY_TYPE,class VAL_TYPE>
+static map<KEY_TYPE,VAL_TYPE> json_get_map2(json j,string key,string val)
+{
+    map<KEY_TYPE,VAL_TYPE> ret;
+    auto jsons = j.get<vector<json>>();
+    for(auto xx:jsons)
+    {
+        KEY_TYPE k = xx[key].get<KEY_TYPE>();
+        VAL_TYPE v = xx[val].get<VAL_TYPE>();
+        ret[k] = v;
+    }
+    return ret;
+}
