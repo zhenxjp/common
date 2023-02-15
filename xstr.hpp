@@ -51,11 +51,27 @@ static const char *xstrstr(const char *pSrc, const char *pDst, bool bCaseSensiti
 // buf移动到下一位置，方便继续寻找
 static string find_str_ex(const char *&buf, const char *key1, const char *key2)
 {
-    const char *find1 = xstrstr(buf, key1);
+    const char *find1 = nullptr;
+    const char *find2 = nullptr;
+
+    if(key1)
+        find1 = xstrstr(buf, key1);
+    else{
+        find1 = buf;
+        key1 = "";
+    }
+
     if(!find1)
         return "";
 
-    const char *find2 = xstrstr(find1+strlen(key1), key2);
+    if(key2)
+        find2 = xstrstr(find1+strlen(key1), key2);
+    else
+    {
+        find2 = buf + strlen(buf);
+        key2 = "";
+    }
+
     if (!find2)
         return "";
         
@@ -317,7 +333,12 @@ static bool str_starts_with(const string &str,const string & x)
 
 /////////////////////////////////////////////////////////////////////////
 
-
+static void test_find_str()
+{
+    cout<<find_str("aaabbbccc","aaa","ccc")<<endl;
+    cout<<find_str("aaabbbccc",nullptr,"ccc")<<endl;
+    cout<<find_str("aaabbbccc","aaa",nullptr)<<endl;
+}
 static void test_str_with()
 {
     cout<<str_starts_with("aaabbbccc","aaa")<<endl;;
