@@ -24,7 +24,7 @@ static string json_to_mem(json j, int indent = 1)
     return j.dump(indent);
 }
 
-static bool json_to_file(json j, c_t path)
+static bool json_to_file(json j, string path)
 {
     string mem = json_to_mem(j);
     xfile_write_new(path, mem.c_str(), mem.length());
