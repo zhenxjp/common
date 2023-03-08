@@ -106,7 +106,8 @@ static vector<string> find_strs(const char *buf, const char *key1, const char *k
     return ret;
 }
 
-
+// 字符串分割
+// 按照pattern分割str
 static vector<string> xsplit(const string &str, const string &pattern)
 {
     vector<string> resVec;
@@ -146,6 +147,7 @@ static vector<string> xsplit(const string &str, const string &pattern)
     return resVec;
 }
 
+// 将字符串合并，并添加pattern
 static string xmerge(const vector<string> &strs, const string &pattern)
 {
     string ret;
@@ -158,8 +160,7 @@ static string xmerge(const vector<string> &strs, const string &pattern)
     return ret;
 }
 
-
-
+// 删除left 和 right和齐间的字符
 static string delete_tag(string ori_buf,char left,char right)
 {
     string txt_buf;
@@ -191,11 +192,13 @@ static string delete_tag(string ori_buf,char left,char right)
     return txt_buf;
 }
 
+// 删除html的标记<> 和 <> 间的内容
 static string delete_html_tag(string ori_buf)
 {
     return delete_tag(ori_buf,'<','>');
 }
 
+// 字符串替换：每次从头替换
 static int replace_all(std::string &str, const std::string &old_value, const std::string &new_value)
 {
     int find_cnt = 0;
@@ -214,6 +217,7 @@ static int replace_all(std::string &str, const std::string &old_value, const std
     }
     return find_cnt;
 }
+// 字符串替换：每次从找到的位置继续替换
 static int replace_all2(std::string &str, const std::string &old_value, const std::string &new_value)
 {
     int find_cnt = 0;
@@ -235,6 +239,7 @@ static int replace_all2(std::string &str, const std::string &old_value, const st
     return find_cnt;
 }
 
+// 查找str中key的个数
 static int find_str_cnt(const std::string &str, const std::string &key)
 {
     int find_cnt = 0;
@@ -268,16 +273,6 @@ static wstring utf8_decode(const string &source)
     return wstring_convert<codecvt_utf8<wchar_t>>().from_bytes(source);
 }
 
-static string xx_to_str(const wstring &source)
-{
-    return utf8_encode(source);
-}
-
-static wstring xx_to_wstr(const string &source)
-{
-    return utf8_decode(source);
-}
-
 static int get_utf8_cnt(const string &str)
 {
     wstring wstr = utf8_decode(str);
@@ -288,6 +283,7 @@ static unsigned char ToHex(unsigned char x)
 { 
     return  x > 9 ? x + 55 : x + 48; 
 }
+
 static string get_url_encode(string str)
 {
     std::string strTemp = "";
