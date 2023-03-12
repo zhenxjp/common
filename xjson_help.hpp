@@ -6,7 +6,7 @@
 using namespace std;
 using namespace nlohmann;
 
-static json json_from_mem(c_t mem)
+static json json_from_mem(const string& mem)
 {
     json j = json::parse(mem);
 
