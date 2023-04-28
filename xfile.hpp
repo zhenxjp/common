@@ -10,7 +10,11 @@ static void xfile_del(string path)
 static long xfile_get_size(string path)
 {
 	FILE *p = fopen(path.c_str(), "r");
-	CHECK_RETV(NULL != p, -1);
+	if(nullptr == p){
+		printf("path = %s",path.c_str());
+		CHECK_RETV(NULL != p, -1);
+	}
+	
 
 	fseek(p, 0, SEEK_END);
 	long lRet = ftell(p);
