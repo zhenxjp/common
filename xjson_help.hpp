@@ -8,13 +8,24 @@ using namespace nlohmann;
 
 static json json_from_mem(const string& mem)
 {
-    json j = json::parse(mem);
+    json j;
+    try{
+        j = json::parse(mem);
+    }
+    catch(...) {
+        cout<<"json error: "<<  mem<<endl;
+    }
+
 
     return j;
 }
 
 static json json_from_file(string path)
 {
+    if(!xfile_exists(path))
+    {
+        return json();
+    }
     string mem = xfile_read(path);
     return json_from_mem(mem.c_str());
 }
