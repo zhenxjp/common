@@ -48,7 +48,7 @@ static int xfile_write_append(string path, const char *p, size_t nLen, int32_t n
 	PF = fopen(path.c_str(), "ab+");
 	if (nullptr == PF)
 	{
-		printf("xfile_read err,file=%s,err=%d\n", path.c_str(), errno);
+		printf("xfile_write_append err,file=%s,err=%d\n", path.c_str(), errno);
 		return 0;
 	}
 	CHECK_RETV(0 == fseek(PF, nOff, SEEK_SET), -1);
