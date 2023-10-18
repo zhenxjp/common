@@ -30,6 +30,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
+#include <sys/syscall.h>
 #include <fcntl.h>
 #include <signal.h>
 //////////////////////////////
@@ -62,4 +63,9 @@ static bool cpu_bind(pthread_t th,int32_t cpu_idx)
     CPU_ZERO(&mask);
     CPU_SET(cpu_idx,&mask);
     return 0 ==  pthread_setaffinity_np(th,sizeof(mask),&mask);
+}
+
+static uint32_t get_cur_tid()
+{
+    return ::syscall(SYS_gettid);
 }
