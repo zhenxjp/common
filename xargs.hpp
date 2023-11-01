@@ -21,25 +21,25 @@ static int32_t xx_get_argidx(int argc, char** argv, c_t key)
 // eg：-key1 val1，传入-key1返回val1
 static c_t xx_get_arg(int argc, char** argv, c_t key,c_t default_ret = "") {
 	int32_t idx = xx_get_argidx(argc, argv, key);
-	// 没找到 || 后面没了
-	if (-1 == idx|| idx == argc - 1) {
-		return default_ret;
+	
+	c_t ret = default_ret;
+	if (-1 != idx && idx != argc - 1) {
+		ret = argv[idx + 1];
 	}
-	return argv[idx + 1];
+	cout<<"key="<<key<<",val="<<ret<<endl;
+	return ret;
 }
 
 static int64_t xx_get_arg_i64(int argc, char** argv, c_t key,int64_t default_ret = -1){
+	
 	int32_t idx = xx_get_argidx(argc, argv, key);
-	// 没找到 || 后面没了
-	if (-1 == idx|| idx == argc - 1) {
-		return default_ret;
+	int64_t ret = default_ret;
+	if (-1 != idx && idx != argc - 1) {
+		ret = atoll(argv[idx + 1]);
 	}
-
-    return atoll(argv[idx + 1]);
+	cout<<"key="<<key<<",val="<<ret<<endl;
+	return ret;
 }
-
-
-
 
 
 #define xx_arg_have(key)  (-1 != xx_get_argidx(argc,argv,key))
