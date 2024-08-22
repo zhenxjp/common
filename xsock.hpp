@@ -50,10 +50,11 @@ public:
     }
 
     bool tcp_create(){
-        close();
-        sock_ = ::socket(AF_INET, SOCK_STREAM, 0);
-		CHECK_RETV(invalid_sock != sock_,false);
-        return true;
+        return socket_create(SOCK_STREAM);
+    }
+
+    bool udp_create(){
+        return socket_create(SOCK_DGRAM);
     }
 
     bool xbind(const char *ip, port_t port)
@@ -230,6 +231,15 @@ public:
         CHECK_RETV(0 == ret,true);
         CHECK_RETV(0 == result,true);
         return false;
+    }
+
+private:
+
+    bool socket_create(int __type){
+        close();
+        sock_ = ::socket(AF_INET, __type, 0);
+		CHECK_RETV(invalid_sock != sock_,false);
+        return true;
     }
 public:
     int32_t sock_{-1};

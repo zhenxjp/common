@@ -52,9 +52,15 @@ static bool _xxx_printf = true;
         printf("err!file:%s,line:%u,func:%s,last err=%u %s\n",\
             __FILE__,__LINE__,__FUNCTION__,errno,strerror(errno));\
     }
+#define X_P_VAL(val)\
+    if(_xxx_printf){\
+        printf(#val"=%d \n",val);\
+    }
 	
 #define CHECK_RETV(value, ret) if (0 == (value)){X_P_INFO;return (ret);};
 #define CHECK_RET(value) if (0 == (value)){X_P_INFO;return ;};
+
+#define CHECK0_RETV(value, ret) if (0 != (value)){X_P_INFO;X_P_VAL(value);return (ret);};
 
 //////////////////////////////
 static bool cpu_bind(pthread_t th,int32_t cpu_idx)
