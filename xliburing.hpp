@@ -6,6 +6,11 @@
 #include <poll.h>
 
 
+static void msec_to_ts(struct __kernel_timespec *ts, unsigned int msec)
+{
+	ts->tv_sec = msec / 1000;
+	ts->tv_nsec = (msec % 1000) * 1000000;
+}
 class xliburing
 {
 public:
@@ -88,15 +93,34 @@ public:
         CHECK_RETV(1 == ret, false);
         return true;
     }
-    
+
+    // flags |= IORING_TIMEOUT_MULTISHOT:重复触发
+    bool uring_timeout(int timeout_ms,unsigned count, unsigned flags,
+                        void *user_data = nullptr)
+    {
+        struct io_uring_sqe *sqe = io_uring_get_sqe(&ring_);
+        CHECK_RETV(nullptr != sqe, false);
+        io_uring_sqe_set_data(sqe, user_data);
+
+        struct __kernel_timespec ts;
+        msec_to_ts(&ts,timeout_ms);
+
+        io_uring_prep_timeout(sqe, &ts, count, flags);
+
+        int ret = io_uring_submit(&ring_);
+        CHECK_RETV(1 == ret, false);
+
+        return true;
+    }
+
     int get_cqes(io_uring_cqe **cqes,int cnt,int timeout_ms = -1)
     {
         __kernel_timespec *ts_use = nullptr;
         struct __kernel_timespec ts;
+
         if(-1 != timeout_ms)
         {
-            ts.tv_sec = timeout_ms / 1000;
-            ts.tv_nsec = timeout_ms % 1000 * 1000000;
+            msec_to_ts(&ts,timeout_ms);
             ts_use = &ts;
         }
 
@@ -120,9 +144,9 @@ public:
         }
     }
 
-    void cqe_seen(io_uring_cqe *cqe)
+    void cqe_seen(int cnt = 1)
     {
-        io_uring_cqe_seen(&ring_, cqe);
+        io_uring_cq_advance(&ring_, cnt);
     }
 
 public:
