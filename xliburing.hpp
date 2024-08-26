@@ -2,6 +2,9 @@
 
 #include "liburing.h"
 #include "xcom.hpp"
+#include <sys/eventfd.h>
+#include <poll.h>
+
 
 class xliburing
 {
@@ -28,61 +31,80 @@ public:
         return init_params(128, 0);
     }
 
-    bool uring_sendmsg(int sockfd, msghdr msg, void *user_data)
+    bool uring_sendmsg(int sockfd, msghdr *msg,unsigned int flags,
+                         void *user_data = nullptr)
     {
         struct io_uring_sqe *sqe = io_uring_get_sqe(&ring_);
         CHECK_RETV(nullptr != sqe, false);
-
         io_uring_sqe_set_data(sqe, user_data);
-        io_uring_prep_sendmsg(sqe, sockfd, &msg, 0);
+
+        io_uring_prep_sendmsg(sqe, sockfd, msg, 0);
 
         int ret = io_uring_submit(&ring_);
         CHECK_RETV(1 == ret, false);
-
         return true;
     }
 
-    bool uring_recvmsg(int sockfd, msghdr &msg, void *user_data)
+    bool uring_recvmsg(int sockfd, msghdr *msg, unsigned int flags,
+                        void *user_data = nullptr,
+                        bool multishot = false)
     {
-        print_ring_info("before get sqe");
         struct io_uring_sqe *sqe = io_uring_get_sqe(&ring_);
         CHECK_RETV(nullptr != sqe, false);
-        print_ring_info("after get sqe");
-
         io_uring_sqe_set_data(sqe, user_data);
 
-        print_ring_info("before prep");
-        io_uring_prep_recvmsg(sqe, sockfd, &msg, 0);
-        print_ring_info("after prep,before submit");
+        if(multishot)
+        {
+            io_uring_prep_recvmsg_multishot(sqe, sockfd, msg, 0);
+
+        }else{
+            io_uring_prep_recvmsg(sqe, sockfd, msg, 0);
+        }
+
 
         int ret = io_uring_submit(&ring_);
         CHECK_RETV(1 == ret, false);
-        print_ring_info("after submit");
-
         return true;
     }
 
-    bool uring_send(int sockfd,
-                    void *buf, size_t len,
-                    void *user_data,
-                    sockaddr_in saddr)
+    bool uring_event_fd(int fd, unsigned int poll_mask = POLLIN,
+                        void *user_data = nullptr,
+                        bool multishot = false)
     {
-        struct iovec iov = {
-            .iov_base = buf,
-            .iov_len = len,
-        };
+        struct io_uring_sqe *sqe = io_uring_get_sqe(&ring_);
+        CHECK_RETV(nullptr != sqe, false);
+        io_uring_sqe_set_data(sqe, user_data);
 
-        msghdr msg;
-        memset(&msg, 0, sizeof(msg));
-        msg.msg_name = &saddr;
-        msg.msg_namelen = sizeof(struct sockaddr_in);
-        msg.msg_iov = &iov;
-        msg.msg_iovlen = 1;
+        if(multishot)
+        {
+            io_uring_prep_poll_multishot(sqe, fd, POLLIN);
 
-        return uring_sendmsg(sockfd, msg, user_data);
+        }else{
+            io_uring_prep_poll_add(sqe, fd, POLLIN);
+        }
+
+
+        int ret = io_uring_submit(&ring_);
+        CHECK_RETV(1 == ret, false);
+        return true;
+    }
+    
+    int get_cqes(io_uring_cqe **cqes,int cnt,int timeout_ms = -1)
+    {
+        __kernel_timespec *ts_use = nullptr;
+        struct __kernel_timespec ts;
+        if(-1 != timeout_ms)
+        {
+            ts.tv_sec = timeout_ms / 1000;
+            ts.tv_nsec = timeout_ms % 1000 * 1000000;
+            ts_use = &ts;
+        }
+
+	    int ret = io_uring_wait_cqes(&ring_, cqes, cnt, ts_use, nullptr);
+        return ret;
     }
 
-    io_uring_cqe *get_cqe()
+    io_uring_cqe *peek_cqe()
     {
         io_uring_cqe *cqe = nullptr;
         int ret = io_uring_peek_cqe(&ring_, &cqe);
@@ -96,6 +118,11 @@ public:
             CHECK0_RETV(ret, nullptr);
             return nullptr;
         }
+    }
+
+    void cqe_seen(io_uring_cqe *cqe)
+    {
+        io_uring_cqe_seen(&ring_, cqe);
     }
 
 public:
