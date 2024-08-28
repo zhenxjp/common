@@ -40,7 +40,7 @@ public:
         auto temp = w_idx_ + cnt;
         std::atomic_thread_fence(std::memory_order_release);
         w_idx_ = temp;
-        // print();
+        print();
     }
 
     void reader_done(uint64_t cnt)
@@ -48,16 +48,27 @@ public:
         auto temp = r_idx_ + cnt;
         std::atomic_thread_fence(std::memory_order_release);
         r_idx_ = temp;
-        // print();
+        print();
     }
 
     void print()
     {
-        printf("w_idx=%ju,r_idx=%ju,get_unread_cnt=%ju,get_free_cnt=%ju\n",
-               w_idx_, r_idx_, get_unread_cnt(), get_free_cnt());
+        if(!print_)
+            return ;
+
+        printf("[0x%p]w_idx=%ju,r_idx=%ju,get_unread_cnt=%ju,get_free_cnt=%ju\n",
+               this,w_idx_, r_idx_, get_unread_cnt(), get_free_cnt());
     }
 
+    void init(uint64_t blk_cnt)
+    {
+        blk_cnt_ = blk_cnt;
+    }
+    
+
 protected:
+    bool print_ = false;
+
     volatile uint64_t w_idx_ = 0;
     volatile uint64_t r_idx_ = 0;
 

@@ -113,6 +113,17 @@ public:
         return true;
     }
 
+    // 循环方式
+    /**
+    if (0 == ret && nullptr != cqe)
+    {
+        io_uring_for_each_cqe(&r.ring_, head, cqe)
+        {
+            ++num_completed;
+        }
+        r.cqe_seen(num_completed);
+    }
+    **/
     int get_cqes(io_uring_cqe **cqes,int cnt,int timeout_ms = -1)
     {
         __kernel_timespec *ts_use = nullptr;
@@ -126,6 +137,18 @@ public:
 
 	    int ret = io_uring_wait_cqes(&ring_, cqes, cnt, ts_use, nullptr);
         return ret;
+    }
+
+
+
+    io_uring_cqe* get_cqe(int timeout_ms = -1)
+    {
+        io_uring_cqe* cqe = nullptr;
+        int ret = get_cqes(&cqe, 1, timeout_ms);
+        if(0 == ret)
+            return cqe;
+        else
+            return nullptr;
     }
 
     io_uring_cqe *peek_cqe()
