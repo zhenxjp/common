@@ -53,16 +53,19 @@ public:
 
     void print()
     {
-        if(print_change_)
+        if(!print_change_)
             return ;
 
         print_info();
     }
 
-    void print_info()
+    void print_info(const char *p = nullptr)
     {
-        printf("[0x%p]w_idx=%ju,r_idx=%ju,get_unread_cnt=%ju,get_free_cnt=%ju\n",
-               this,w_idx_, r_idx_, get_unread_cnt(), get_free_cnt());
+        if(p == nullptr)
+            p = "";
+
+        printf("[%s][0x%p]w_idx=%ju,r_idx=%ju,get_unread_cnt=%ju,get_free_cnt=%ju\n",
+               p,this,w_idx_, r_idx_, get_unread_cnt(), get_free_cnt());
     }
 
     void init(uint64_t blk_cnt)
