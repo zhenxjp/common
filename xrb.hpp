@@ -53,7 +53,7 @@ public:
 
     void print()
     {
-        if(!print_)
+        if(!print_change_)
             return ;
 
         printf("[0x%p]w_idx=%ju,r_idx=%ju,get_unread_cnt=%ju,get_free_cnt=%ju\n",
@@ -67,7 +67,7 @@ public:
     
 
 protected:
-    bool print_ = false;
+    bool print_change_ = false;
 
     volatile uint64_t w_idx_ = 0;
     volatile uint64_t r_idx_ = 0;
