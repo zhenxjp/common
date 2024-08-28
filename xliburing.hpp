@@ -24,6 +24,9 @@ public:
                ring_.sq.sqe_head, ring_.sq.sqe_tail,
                *ring_.cq.khead, *ring_.cq.ktail);
     }
+
+    // 初始化
+    // queue_depth、flags参考liburing说明
     bool init_params(int queue_depth, int flags)
     {
         int err = io_uring_queue_init(queue_depth, &ring_, flags);
@@ -36,6 +39,8 @@ public:
         return init_params(128, 0);
     }
 
+    // 异步发数据
+    // flags:参考liburing说明
     bool uring_sendmsg(int sockfd, msghdr *msg,unsigned int flags,
                          void *user_data = nullptr)
     {
@@ -50,6 +55,9 @@ public:
         return true;
     }
 
+    // 异步收数据
+    // multishot：收到数据后，无需再次调用本接口
+    // flags:参考liburing说明
     bool uring_recvmsg(int sockfd, msghdr *msg, unsigned int flags,
                         void *user_data = nullptr,
                         bool multishot = false)
@@ -72,6 +80,9 @@ public:
         return true;
     }
 
+    // 注册eventfd到liburing中
+    // multishot：eventfd触发后，无需再次调用本接口
+    // poll_mask:参考liburing说明
     bool uring_event_fd(int fd, unsigned int poll_mask = POLLIN,
                         void *user_data = nullptr,
                         bool multishot = false)
@@ -94,7 +105,8 @@ public:
         return true;
     }
 
-    // flags |= IORING_TIMEOUT_MULTISHOT:重复触发
+    // 创建定时任务
+    // flags:参考liburing说明（IORING_TIMEOUT_MULTISHOT重复触发）
     bool uring_timeout(int timeout_ms,unsigned count, unsigned flags,
                         void *user_data = nullptr)
     {
@@ -113,7 +125,10 @@ public:
         return true;
     }
 
-    // 循环方式
+    // 批量等待事件
+    // timeout_ms：超时时间
+
+    // 结果使用方式
     /**
     if (0 == ret && nullptr != cqe)
     {
@@ -140,7 +155,8 @@ public:
     }
 
 
-
+    // 等待事件
+    // timeout_ms：超时时间
     io_uring_cqe* get_cqe(int timeout_ms = -1)
     {
         io_uring_cqe* cqe = nullptr;
@@ -151,6 +167,7 @@ public:
             return nullptr;
     }
 
+    // 取出事件，若无则返回
     io_uring_cqe *peek_cqe()
     {
         io_uring_cqe *cqe = nullptr;
@@ -167,6 +184,7 @@ public:
         }
     }
 
+    // 事件处理完毕
     void cqe_seen(int cnt = 1)
     {
         io_uring_cq_advance(&ring_, cnt);
