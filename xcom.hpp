@@ -33,6 +33,7 @@
 #include <sys/syscall.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <atomic> 
 //////////////////////////////
 using namespace std;
 
