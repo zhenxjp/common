@@ -97,13 +97,15 @@ public:
     
 
 protected:
-    bool print_change_ = false;
-
     volatile uint64_t w_idx_ = 0;
-    volatile uint64_t r_idx_ = 0;
+    char padding1_[64 - sizeof(uint64_t)];
 
+    volatile uint64_t r_idx_ = 0;
+    char padding2[64 - 2 * sizeof(uint64_t)];
+    
     volatile uint64_t blk_cnt_ = 0;
     volatile uint64_t blk_mask_ = 0;
+    bool print_change_ = false;
 };
 
 
@@ -112,7 +114,7 @@ class rb:public rb_base
 public:
     bool init(uint64_t blk_cnt,uint64_t blk_size)
     {
-        blk_cnt_ = blk_cnt;
+        rb_base::init(blk_cnt);
         blk_size_ = blk_size;
         buf_ = (char*)malloc(blk_cnt*blk_size);
 
@@ -141,7 +143,7 @@ public:
 private:
     char* get_buffer(uint64_t idx)
     {
-        idx = idx % blk_cnt_;// TODO
+        idx = idx & blk_mask_;
         return buf_ + idx * blk_size_;
     }
 
@@ -153,13 +155,17 @@ private:
 class rb_iov:public rb_base
 {
 public:
-    bool init(uint64_t blk_cnt,uint64_t blk_size)
+    bool init(uint64_t blk_cnt,uint64_t blk_size,bool memset0 = true)
     {
         rb_base::init(blk_cnt);
         blk_size_ = next_power_of_two(blk_size);
 
         iov_ = new iovec[blk_cnt];
         mem_ = (char*)malloc(blk_cnt*blk_size);
+        if (memset0)
+        {
+            memset(mem_, 0, blk_cnt*blk_size);
+        }   
 
         for (size_t i = 0; i < blk_cnt; i++)
         {
