@@ -11,6 +11,7 @@
 #include "xstr.hpp"
 
 #include "xrb.hpp"
+#include "xio.hpp"
 
 #include "xee.hpp"
 #include "xsock.hpp"

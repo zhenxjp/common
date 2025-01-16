@@ -101,17 +101,19 @@ static int xfile_xfile_write_lines(string path, vector<string> lines)
 	return xfile_write_new(path, all.c_str(), all.length());
 }
 
-static bool xfile_create_foder(string path)
-{
-	bool ret = fs::create_directories(path);
-	return ret;
-}
-
 static bool xfile_exists(string path)
 {
 	bool ret = fs::exists(path);
 	return ret;
 }
+
+static bool xfile_create_foder(string path)
+{
+	fs::create_directories(path);
+	return xfile_exists(path);
+}
+
+
 
 static vector<string> xfile_files_in_dir(string path, bool recursive = false)
 {
