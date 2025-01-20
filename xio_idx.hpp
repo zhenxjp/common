@@ -65,13 +65,35 @@ public:
         return 0;
     }
 
-    uint32_t get(uint64_t idx)
+    uint32_t get_offset(uint64_t idx)
     {
         if(idx >= cnt_)
         {
             return -1;
         }
-        return index_[idx / meta_.blk_cnt_max_][idx % meta_.blk_cnt_max_];
+        uint64_t idx_in_blk = idx % meta_.blk_cnt_max_;
+        uint64_t blk_idx = idx / meta_.blk_cnt_max_;
+        uint32_t* idx_ptr = index_[blk_idx];
+        return idx_ptr[idx_in_blk];
+    }
+
+    uint32_t get_len(uint64_t idx)
+    {
+        if(idx >= cnt_)
+        {
+            return -1;
+        }
+        uint64_t idx_in_blk = idx % meta_.blk_cnt_max_;
+        uint64_t blk_idx = idx / meta_.blk_cnt_max_;
+        uint32_t* idx_ptr = index_[blk_idx];
+
+
+        if(0 == idx_in_blk)
+        {
+            return idx_ptr[idx_in_blk];
+        }else{
+            return idx_ptr[idx_in_blk] - idx_ptr[idx_in_blk - 1];
+        }
     }
 
     int adds(iovec *iov,uint64_t cnt)
