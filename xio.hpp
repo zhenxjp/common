@@ -44,20 +44,35 @@ public:
         {
             if(io_init_type::init_new ==ctx_.init_type_)
             {
-                return create_new();
+                return write_new();
             }else
             {
-                idx_.load_exist(ctx_.meta_,idx_path_);
-                return 0;
+                return write_exist();
             }
+        }else{
+
         }
         
         return 0;
     }
+
+    int write_data(iovec *iov,uint64_t cnt,uint32_t &written)
+    {
+        // todo check blk
+        
+
+
+        
+    }
 private:
+    int write_exist()
+    {
+        idx_.load_exist(ctx_.meta_,idx_path_);
+        return 0;
+    }
 
 
-    int create_new()
+    int write_new()
     {
         // 创建目录
         bool c_ret = xfile_create_foder(ctx_.path_);
@@ -72,6 +87,10 @@ private:
         return 0;
     }
 public:
+    uint32_t w_f_no_ = 0;
+    uint32_t w_f_idx_ = 0;
+    vector<int> fds_;
+
     io_context ctx_;
     
     io_idx idx_;
