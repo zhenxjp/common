@@ -40,10 +40,16 @@ public:
         idx_path_ = ctx_.path_ + ctx_.prefix_ + ".index";
         data_pre_ = ctx_.path_ + ctx_.prefix_ + ".";
 
-        if (io_rw_type::rw_write == ctx_.rw_type_
-            && io_init_type::init_new ==ctx_.init_type_)
+        if (io_rw_type::rw_write == ctx_.rw_type_)
         {
-           return create_new();
+            if(io_init_type::init_new ==ctx_.init_type_)
+            {
+                return create_new();
+            }else
+            {
+                idx_.load_exist(ctx_.meta_,idx_path_);
+                return 0;
+            }
         }
         
         return 0;
