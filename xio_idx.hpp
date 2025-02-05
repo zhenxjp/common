@@ -47,7 +47,14 @@ struct io_meta
     uint64_t io_type_ = 0;
     uint64_t blk_size_ = 1024;
     uint64_t blk_cnt_max_ = 1024;
-
+    string dump() const
+    {
+        string str;
+        str += "io_type_:" + to_string(io_type_) + ",";
+        str += "blk_size_:" + to_string(blk_size_) + ",";
+        str += "blk_cnt_max_:" + to_string(blk_cnt_max_) + "\n";
+        return str;
+    }
 };
 
 typedef uint32_t idx_t ;
@@ -66,14 +73,18 @@ public:
         fd_ = open(path.c_str(),O_RDWR);
         ssize_t read_len = xread(fd_,&meta_,META_LEN);
 
-        if(0 != memcmp(&meta_,&meta,META_LEN))
+        if(read_len != META_LEN || 0 != memcmp(&meta_,&meta,META_LEN))
         {
-            X_P_INFO;
+            printf("load exist failed\n");
+            printf("read len=%ju\n",read_len);
+            printf("real meta dump:\n%s\n",meta_.dump().c_str());
+            printf("init meta dump:\n%s\n",meta.dump().c_str());
+
             return -2;
         }
 
         auto file_size = xfile_get_size(path);
-        uint64_t idx_cnt = (file_size - META_LEN) / IDX_LEN;
+        uint64_t idx_cnt = (file_size - META_LEN) / IDX_LEN;// todo check
         
         while (idx_cnt)
         {
@@ -88,8 +99,8 @@ public:
                 return -1;
             }
             idx_cnt -= read_cnt;
+            cnt_ += read_cnt;
         }
-        cnt_ = idx_cnt;
         
         return 0;
     }
@@ -115,17 +126,16 @@ public:
         close(fd_);
     }
 
-    uint32_t get_blk_end(uint32_t file_no,uint32_t blk_no)
+    idx_t get_blk_end(uint32_t file_no,uint32_t blk_no)
     {
-        assert(file_no < index_.size());
-        assert(blk_no  < meta_.blk_cnt_max_);
+        XASSERT(file_no < index_.size());
+        XASSERT(blk_no  < meta_.blk_cnt_max_);
         return index_[file_no][blk_no];
-    
     }
-    uint32_t get_blk_start(uint32_t file_no,uint32_t blk_no)
+    idx_t get_blk_start(uint32_t file_no,uint32_t blk_no)
     {
-        assert(file_no < index_.size());
-        assert(blk_no  < meta_.blk_cnt_max_);
+        XASSERT(file_no < index_.size());
+        XASSERT(blk_no  < meta_.blk_cnt_max_);
         if(0 == blk_no)
             return 0;
         return index_[file_no][blk_no-1];
@@ -135,12 +145,18 @@ public:
 
     int add_idx(iovec *iov,uint32_t cnt,uint32_t file_no,uint32_t blk_no)
     {
-        assert(file_no < index_.size());
-        assert(blk_no + cnt <= meta_.blk_cnt_max_);
-        assert(-1 != fd_);
+        XASSERT(file_no < index_.size());
+        XASSERT(blk_no + cnt <= meta_.blk_cnt_max_);
+        XASSERT(-1 != fd_);
+
+        idx_t last_off = 0;
+        if(blk_no > 0)
+            last_off = get_blk_end(file_no,blk_no-1);
+
         for (size_t i = 0; i < cnt; i++)
         {
-            index_[file_no][blk_no+i] = iov[i].iov_len;
+            index_[file_no][blk_no + i] = last_off + iov[i].iov_len;
+            last_off += iov[i].iov_len;
         }
         xwrite(fd_,index_[file_no]+blk_no,cnt*IDX_LEN);
         cnt_+=cnt;
@@ -149,8 +165,8 @@ public:
 
     int fill_iov_len(iovec *iov,uint32_t cnt,uint32_t file_no,uint32_t blk_no)
     {
-        assert(file_no < index_.size());
-        assert(blk_no + cnt <= meta_.blk_cnt_max_);
+        XASSERT(file_no < index_.size());
+        XASSERT(blk_no + cnt <= meta_.blk_cnt_max_);
 
         for(size_t i = 0; i < cnt; i++)
         {

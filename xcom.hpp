@@ -63,6 +63,9 @@ static bool _xxx_printf = true;
 
 #define CHECK0_RETV(value, ret) if (0 != (value)){X_P_INFO;X_P_VAL(value);return (ret);};
 
+
+
+#define XASSERT(value)  if (0 == (value)){X_P_INFO;xexit(0);};
 //////////////////////////////
 static bool cpu_bind(pthread_t th,int32_t cpu_idx)
 {
@@ -77,3 +80,7 @@ static uint32_t get_cur_tid()
     return ::syscall(SYS_gettid);
 }
 
+static void xexit(int code)
+{
+    exit(code);
+}

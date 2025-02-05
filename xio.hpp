@@ -28,32 +28,24 @@ struct io_context
 };
 
 
-class io_idx_mgr
-{
-public:
-    io_idx* get_idx(const string &key)
-    {
-        std::lock_guard<std::mutex> lock(lock_);
-        auto it = idx_map_.find(key);
-        if(it != idx_map_.end())
-        {
-            return it->second;
-        }else{
-            io_idx *idx = new io_idx();
-            idx_map_.insert(std::make_pair(key,idx));
-            return idx;
-        }
-    }
-    static io_idx_mgr& get_instance()
-    {
-        return instance_;
-    }
-private:
-    std::mutex lock_;
-    std::map<string,io_idx*>    idx_map_;
-    static io_idx_mgr instance_;
-};
 
+static io_idx* get_idx(const string &key)
+{
+    static std::mutex lock;
+    static std::map<string,io_idx*>    idx_map;
+
+    std::lock_guard<std::mutex> l(lock);
+
+    auto it = idx_map.find(key);
+    if(it != idx_map.end())
+    {
+        return it->second;
+    }else{
+        io_idx *idx = new io_idx();
+        idx_map.insert(std::make_pair(key,idx));
+        return idx;
+    }
+}
 
 static void calc_iov_cnt(iovec *iov,uint32_t iov_cnt,uint32_t tot_len,
                             uint32_t &iov_full_cnt,uint32_t &remain)
@@ -88,20 +80,22 @@ public:
         xfile_fix_foder(ctx_.path_);
         idx_path_ = ctx_.path_ + ctx_.prefix_ + ".index";
         data_pre_ = ctx_.path_ + ctx_.prefix_ + ".";
-        idx_ = io_idx_mgr::get_instance().get_idx(data_pre_);
+        idx_ = get_idx(data_pre_);
 
+        init_fd();
         if (io_rw_type::rw_write == ctx_.rw_type_)
         {
             if(io_init_type::init_new ==ctx_.init_type_)
             {
-                return init_write_new();
+                init_write_new();
             }else
             {
-                return init_write_exist();
+                init_write_exist();
             }
         }else{
-            
+            init_read();
         }
+        
         
         return 0;
     }
@@ -110,10 +104,10 @@ public:
     {
         read = 0;
         
-        uint32_t blk_max = idx_->meta_.blk_size_;
+        uint32_t blk_max = idx_->meta_.blk_cnt_max_;
 
-        uint32_t blk_no = idx_->cnt_ % blk_max;
-        uint32_t file_no = idx_->cnt_ / blk_max;
+        uint32_t blk_no = start_idx % blk_max;
+        uint32_t file_no = start_idx / blk_max;
         uint32_t offset = idx_->get_blk_start(file_no,blk_no);
 
         cnt = std::min(blk_max - blk_no,cnt);// 不跨文件
@@ -137,20 +131,21 @@ public:
     {
         written = 0;
 
-        uint32_t blk_max = idx_->meta_.blk_size_;
+        uint32_t blk_max = idx_->meta_.blk_cnt_max_;
 
         uint32_t blk_no = idx_->cnt_ % blk_max;
         uint32_t file_no = idx_->cnt_ / blk_max;
         
         cnt = std::min(blk_max - blk_no,cnt);
-        uint32_t offset = idx_->get_blk_start(file_no,blk_no);
 
         // 需要新文件
         if(-1 == fds_[file_no])
         {
-            assert(0 == blk_no);
+            XASSERT(0 == blk_no);
             create_file(file_no);
         }
+
+        uint32_t offset = idx_->get_blk_start(file_no,blk_no);
 
         // 写一次，能写多少是多少
         ssize_t wret = pwritev(fds_[file_no],iov,cnt,offset);
@@ -180,7 +175,12 @@ public:
     }
 
 private:
-    void init_fd_array()
+    void init_read()
+    {
+
+    }
+
+    void init_fd()
     {
         int64_t max_file_cnt_ = 65535;
         int64_t sys_max_open_cnt = sysconf(_SC_OPEN_MAX);
