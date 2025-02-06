@@ -79,9 +79,7 @@ public:
     {
         ctx_ = ctx;
         xfile_fix_foder(ctx_.path_);
-        idx_path_ = ctx_.path_ + ctx_.prefix_ + ".index";
-        data_pre_ = ctx_.path_ + ctx_.prefix_ + ".";
-        idx_ = get_idx(data_pre_);
+        idx_ = get_idx(data_pre());
 
         init_fd();
         if (io_rw_type::rw_write == ctx_.rw_type_)
@@ -118,7 +116,7 @@ public:
 
         if(-1 == fds_[file_no])
         {
-            string path = data_pre_ + std::to_string(file_no);
+            string path = data_pre() + std::to_string(file_no);
             fds_[file_no] = open(path.c_str(),O_RDWR);
             CHECK_RETV(-1 != fds_[file_no],err_file_open_err);
         }
@@ -157,7 +155,7 @@ public:
         if(-1 == fds_[file_no])
         {
             XASSERT(0 == blk_no);
-            string path = data_pre_ + std::to_string(file_no);
+            string path = data_pre() + std::to_string(file_no);
             fds_[file_no] =  open(path.c_str(),O_RDWR|O_CREAT|O_TRUNC,0666);
             CHECK_RETV(-1 != fds_[file_no],err_file_open_err);
 
@@ -211,7 +209,7 @@ private:
 
     int init_write_exist()
     {
-        int idx_ret = idx_->load_exist(ctx_.meta_,idx_path_);
+        int idx_ret = idx_->load_exist(ctx_.meta_,idx_path());
         CHECK_RETV(0 == idx_ret,idx_ret);
         return err_ok;
     }
@@ -223,13 +221,23 @@ private:
         CHECK_RETV(c_ret,err_file_op);
 
         // del old
-        string cmd = "rm -rf " + data_pre_ + "*";
-        printf("del cmd:%s\n",cmd.c_str());
-        system(cmd.c_str());
+        string cmd = "rm -rf " + data_pre() + "*";
+        int sys_ret = system(cmd.c_str());
+        printf("del cmd:%s ret=%d\n",cmd.c_str(),sys_ret);
         
-        int idx_init = idx_->create_new(ctx_.meta_,idx_path_);
+        int idx_init = idx_->create_new(ctx_.meta_,idx_path());
         CHECK_RETV(0 == idx_init,idx_init);
         return err_ok;
+    }
+
+    const string data_pre()
+    {
+        return ctx_.path_ + ctx_.prefix_ + ".";
+    }
+
+    const string idx_path()
+    {
+        return ctx_.path_ + ctx_.prefix_ + ".index";
     }
 public:
     vector<int>    fds_ ;
@@ -237,7 +245,4 @@ public:
     io_context ctx_;
     
     io_idx *idx_;
-    string idx_path_ = "";
-
-    string data_pre_ = "";
 };

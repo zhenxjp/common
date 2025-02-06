@@ -178,17 +178,8 @@ public:
 
     void release()
     {
-        if (iov_ != nullptr)
-        {
-            delete[] iov_;
-            iov_ = nullptr;
-        }
-
-        if (mem_ != nullptr)
-        {
-            delete[] mem_;
-            mem_ = nullptr;
-        }
+        XSAFE_DELETE_ARRAY(iov_);
+        XSAFE_DELETE_ARRAY(mem_);
     }
 
     iovec* writer_get_blk(uint64_t &cnt)

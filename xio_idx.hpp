@@ -132,7 +132,7 @@ public:
         cnt_ = 0;
         for (size_t i = 0; i < index_.size(); i++)
         {
-            delete[] index_[i];
+            XSAFE_DELETE_ARRAY(index_[i]);
         }
         index_.clear();
         XSAFE_CLOSE(fd_);
