@@ -103,14 +103,14 @@ public:
     {
         readed = 0;
 
-        uint32_t blk_max = idx_->meta_.blk_cnt_max_;
+        uint32_t blk_max = ctx_.meta_.blk_cnt_max_;
 
         uint32_t blk_no = start_idx % blk_max;
         uint32_t file_no = start_idx / blk_max;
 
 
         cnt = std::min(blk_max - blk_no,cnt);// 不跨文件
-        cnt = std::min(idx_->cnt_ - start_idx,(uint64_t)cnt);// 不能超过最多大数量
+        cnt = std::min(idx_->cnt() - start_idx,(uint64_t)cnt);// 不能超过最多大数量
         if(0 == cnt)
             return err_ok;
 
@@ -144,10 +144,11 @@ public:
     {
         written = 0;
 
-        uint32_t blk_max = idx_->meta_.blk_cnt_max_;
+        uint32_t blk_max = ctx_.meta_.blk_cnt_max_;
+        uint64_t w_cnt = idx_->cnt();
 
-        uint32_t blk_no = idx_->cnt_ % blk_max;
-        uint32_t file_no = idx_->cnt_ / blk_max;
+        uint32_t blk_no = w_cnt % blk_max;
+        uint32_t file_no = w_cnt / blk_max;
         
         cnt = std::min(blk_max - blk_no,cnt);
 

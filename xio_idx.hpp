@@ -171,6 +171,7 @@ public:
             last_off += iov[i].iov_len;
         }
         xwrite(fd_,index_[file_no]+blk_no,cnt*IDX_LEN);
+        std::atomic_thread_fence(std::memory_order_release);
         cnt_+=cnt;
         return err_ok;
     }
@@ -194,6 +195,13 @@ public:
         XASSERT(nullptr != offset_array);
         index_.push_back(offset_array);
         return offset_array;
+    }
+
+    uint64_t cnt()
+    {
+        uint64_t temp = cnt_;
+        std::atomic_thread_fence(std::memory_order_acquire);
+        return temp;
     }
 private:
     int read_idx_head(const io_meta& meta,const string &path)
@@ -228,7 +236,7 @@ private:
         }
         return err_ok;
     }
-public:
+private:
     uint64_t cnt_ = 0;                      // 已写索引数量
 
     std::vector<idx_t*> index_;
