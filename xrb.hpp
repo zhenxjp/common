@@ -160,7 +160,7 @@ public:
         rb_base::init(blk_cnt);
         blk_size_ = next_power_of_two(blk_size);
 
-        iov_ = new iovec[blk_cnt];
+        iov_ = new  (std::nothrow) iovec[blk_cnt];
         mem_ = (char*)malloc(blk_cnt*blk_size);
         if (memset0)
         {

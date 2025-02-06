@@ -41,7 +41,7 @@ static io_idx* get_idx(const string &key)
     {
         return it->second;
     }else{
-        io_idx *idx = new io_idx();
+        io_idx *idx = new (std::nothrow) io_idx();
         idx_map.insert(std::make_pair(key,idx));
         return idx;
     }
@@ -115,6 +115,13 @@ public:
         if(0 == cnt)
             return 0;
 
+        if(-1 == fds_[file_no])
+        {
+            string path = data_pre_ + std::to_string(file_no);
+            fds_[file_no] = open(path.c_str(),O_RDWR);
+        }
+        
+
         idx_->fill_iov_len(iov,cnt,file_no,blk_no);
         ssize_t rret = preadv(fds_[file_no],iov,cnt,offset);
         uint32_t remain = 0;
@@ -186,7 +193,7 @@ private:
         int64_t sys_max_open_cnt = sysconf(_SC_OPEN_MAX);
         if(-1 != sys_max_open_cnt && sys_max_open_cnt < max_file_cnt_)
             max_file_cnt_ = sys_max_open_cnt;
-        fds_ = new int[max_file_cnt_];
+        fds_ = new (std::nothrow) int[max_file_cnt_];
         std::fill_n(fds_,max_file_cnt_,-1);
     }
 

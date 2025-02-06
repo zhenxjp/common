@@ -11,8 +11,8 @@ static long xfile_get_size(string path)
 {
 	FILE *p = fopen(path.c_str(), "r");
 	if(nullptr == p){
-		printf("path = %s",path.c_str());
-		CHECK_RETV(NULL != p, -1);
+		printf("get_size err,path = %s",path.c_str());
+		return 0;
 	}
 	
 
