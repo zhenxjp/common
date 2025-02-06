@@ -113,6 +113,7 @@ public:
 
     int create_new(const io_meta& meta,const string &path)
     {
+        release();
         meta_ = meta;
         fd_ = open(path.c_str(),O_RDWR|O_CREAT|O_TRUNC,0666);
         CHECK_RETV(fd_,err_file_open_err);
@@ -128,12 +129,13 @@ public:
 
     void release()
     {
+        cnt_ = 0;
         for (size_t i = 0; i < index_.size(); i++)
         {
             delete[] index_[i];
         }
         index_.clear();
-        close(fd_);
+        XSAFE_CLOSE(fd_);
     }
 
     idx_t get_blk_end(uint32_t file_no,uint32_t blk_no)
