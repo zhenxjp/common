@@ -66,6 +66,9 @@ static bool _xxx_printf = true;
 
 
 #define XASSERT(value)  if (0 == (value)){X_P_INFO;xexit(0);};
+
+#define XSAFE_DELETE(p) if(p){delete p;p=nullptr;}
+#define XSAFE_CLOSE(fd) if(fd>0){close(fd);fd=-1;}
 //////////////////////////////
 static bool cpu_bind(pthread_t th,int32_t cpu_idx)
 {

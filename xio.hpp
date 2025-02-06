@@ -183,14 +183,12 @@ public:
 
     void release()
     {
-        for (size_t i = 0; i < max_file_cnt_; i++)
+        for (size_t i = 0; i < fds_.size(); i++)
         {
-            if (-1 != fds_[i])
-            {
-                close(fds_[i]);
-            }
+            XSAFE_CLOSE(fds_[i]);
         }
-        delete [] fds_;
+        fds_.clear();
+        // XSAFE_DELETE(idx_);
     }
 
 private:
@@ -201,14 +199,12 @@ private:
 
     void init_fd()
     {
-        int64_t max_file_cnt_ = 65535;
+        int64_t max_file_cnt = 65535;
         int64_t sys_max_open_cnt = sysconf(_SC_OPEN_MAX);
-        if(-1 != sys_max_open_cnt && sys_max_open_cnt < max_file_cnt_)
-            max_file_cnt_ = sys_max_open_cnt;
-        max_file_cnt_ += 1000;
-        fds_ = new (std::nothrow) int[max_file_cnt_];
-        XASSERT(fds_);
-        std::fill_n(fds_,max_file_cnt_,-1);
+        if(-1 != sys_max_open_cnt && sys_max_open_cnt < max_file_cnt)
+            max_file_cnt = sys_max_open_cnt;
+        max_file_cnt += 1000;
+        fds_.resize(max_file_cnt,-1);
     }
 
 
@@ -236,9 +232,7 @@ private:
         return err_ok;
     }
 public:
-
-    int *fds_ = nullptr;
-    uint32_t max_file_cnt_ = 0;
+    vector<int>    fds_ ;
 
     io_context ctx_;
     

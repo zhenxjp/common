@@ -161,7 +161,7 @@ public:
         blk_size_ = next_power_of_two(blk_size);
 
         iov_ = new  (std::nothrow) iovec[blk_cnt];
-        mem_ = (char*)malloc(blk_cnt*blk_size);
+        mem_ = new  (std::nothrow) char[blk_cnt*blk_size];
         if (memset0)
         {
             memset(mem_, 0, blk_cnt*blk_size);
@@ -174,6 +174,21 @@ public:
         }
         
         return true;
+    }
+
+    void release()
+    {
+        if (iov_ != nullptr)
+        {
+            delete[] iov_;
+            iov_ = nullptr;
+        }
+
+        if (mem_ != nullptr)
+        {
+            delete[] mem_;
+            mem_ = nullptr;
+        }
     }
 
     iovec* writer_get_blk(uint64_t &cnt)
