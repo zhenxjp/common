@@ -107,7 +107,7 @@ public:
             cnt_ += read_cnt;
         }
         
-        return 0;
+        return err_ok;
     }
 
 
@@ -120,7 +120,7 @@ public:
         auto wret = xwrite(fd_,&meta_,META_LEN);
         if(META_LEN != wret)
         {
-            printf("write meta error %ju %ju\n",META_LEN,wret);
+            printf("write meta error %u %ju\n",META_LEN,wret);
             return err_file_write_err;
         }
         return err_ok;
