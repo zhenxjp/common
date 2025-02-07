@@ -156,7 +156,8 @@ class rb_iov:public rb_base
 {
 public:
     bool init(uint64_t blk_cnt,uint64_t blk_size,bool memset0 = true)
-    {
+    {   
+        blk_cnt = next_power_of_two(blk_cnt);
         rb_base::init(blk_cnt);
         blk_size_ = next_power_of_two(blk_size);
 
