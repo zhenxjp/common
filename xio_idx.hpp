@@ -197,7 +197,7 @@ public:
         return offset_array;
     }
 
-    uint64_t cnt()
+    uint64_t cnt() const
     {
         uint64_t temp = cnt_;
         std::atomic_thread_fence(std::memory_order_acquire);
