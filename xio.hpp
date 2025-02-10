@@ -103,6 +103,11 @@ public:
     {
         readed = 0;
 
+        auto cur_cnt = idx_->cnt();
+        if(cur_cnt <= start_idx)
+            return err_ok;
+
+
         uint32_t blk_max = ctx_.meta_.blk_cnt_max_;
 
         uint32_t blk_no = start_idx % blk_max;
@@ -110,7 +115,8 @@ public:
 
 
         cnt = std::min(blk_max - blk_no,cnt);// 不跨文件
-        cnt = std::min(idx_->cnt() - start_idx,(uint64_t)cnt);// 不能超过最多大数量
+        cnt = std::min(cur_cnt - start_idx,(uint64_t)cnt);// 不能超过最多大数量
+        
         if(0 == cnt)
             return err_ok;
 
@@ -118,7 +124,11 @@ public:
         {
             string path = data_pre() + std::to_string(file_no);
             fds_[file_no] = open(path.c_str(),O_RDWR);
-            CHECK_RETV(-1 != fds_[file_no],err_file_open_err);
+            if(-1 == fds_[file_no])
+            {
+                printf("open file errno=%u %s ,path=%s\n",errno,strerror(errno),path.c_str());
+                return err_file_open_err;
+            }
         }
         
         uint32_t offset = idx_->get_blk_start(file_no,blk_no);
@@ -224,7 +234,7 @@ private:
         // del old
         string cmd = "rm -rf " + data_pre() + "*";
         int sys_ret = system(cmd.c_str());
-        printf("del cmd:%s ret=%d\n",cmd.c_str(),sys_ret);
+        // printf("del cmd:%s ret=%d\n",cmd.c_str(),sys_ret);
         
         int idx_init = idx_->create_new(ctx_.meta_,idx_path());
         CHECK_RETV(0 == idx_init,idx_init);

@@ -34,6 +34,8 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <atomic> 
+#include <dirent.h>
+#include <sys/stat.h>
 //////////////////////////////
 using namespace std;
 

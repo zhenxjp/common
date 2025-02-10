@@ -2,6 +2,7 @@
 #include "xcom.hpp"
 #include "xstr.hpp"
 
+
 static void xfile_del(string path)
 {
 	remove(path.c_str());
@@ -92,8 +93,7 @@ static string xfile_fix_foder(string &foder)
 	return foder;
 }
 //////////////////////////////////////////////////////////////////////////
-#include <filesystem>
-namespace fs = std::filesystem;
+
 
 static int xfile_xfile_write_lines(string path, vector<string> lines)
 {
@@ -101,63 +101,112 @@ static int xfile_xfile_write_lines(string path, vector<string> lines)
 	return xfile_write_new(path, all.c_str(), all.length());
 }
 
-static bool xfile_exists(string path)
+static bool xfile_exists(const string& path)
 {
-	bool ret = fs::exists(path);
-	return ret;
-}
-
-static bool xfile_create_foder(string path)
-{
-	fs::create_directories(path);
-	return xfile_exists(path);
+	return access(path.c_str(), F_OK) == 0;
 }
 
 
 
-static vector<string> xfile_files_in_dir(string path, bool recursive = false)
-{
-	vector<string> ret;
-	if (recursive)
-	{
-		for (auto const &dir_entry : fs::recursive_directory_iterator(path))
-		{
-			if(dir_entry.is_regular_file())
-				ret.push_back(dir_entry.path());
-		}
-	}
-	else
-	{
-		for (auto const &dir_entry : fs::directory_iterator(path))
-		{
-			if(dir_entry.is_regular_file())
-				ret.push_back(dir_entry.path());
-		}
-	}
-
-	return ret;
+// 递归创建多层目录的函数
+bool xfile_create_foder(const std::string& path, mode_t mode = 0774) {
+    size_t pos = 0;
+    std::string tempPath;
+    // 处理路径为空的情况
+    if (path.empty()) {
+        return false;
+    }
+    // 遍历路径中的每一级目录
+    while ((pos = path.find('/', pos)) != std::string::npos) {
+        // 截取当前路径的前缀
+        tempPath = path.substr(0, pos);
+        // 如果前缀不为空，则尝试创建该目录
+        if (!tempPath.empty()) {
+            if (mkdir(tempPath.c_str(), mode) != 0 && errno != EEXIST) {
+                return false;
+            }
+        }
+        ++pos;
+    }
+    // 尝试创建完整的路径
+    if (mkdir(path.c_str(), mode) != 0 && errno != EEXIST) {
+        return false;
+    }
+    return true;
 }
 
-static vector<string> xfile_dirss_in_dir(string path, bool recursive = false)
-{
-	vector<string> ret;
-	if (recursive)
-	{
-		for (auto const &dir_entry : fs::recursive_directory_iterator(path))
-		{
-			if(dir_entry.is_directory())
-				ret.push_back(dir_entry.path());
-		}
-	}
-	else
-	{
-		for (auto const &dir_entry : fs::directory_iterator(path))
-		{
-			if(dir_entry.is_directory())
-				ret.push_back(dir_entry.path());
-		}
-	}
+// 检查路径是否是目录
+bool is_directory(const string& path) {
+    struct stat statbuf;
+    if (stat(path.c_str(), &statbuf) != 0)
+        return false;
+    return S_ISDIR(statbuf.st_mode);
+}
 
-	return ret;
+// 检查路径是否是普通文件
+bool is_regular_file(const string& path) {
+    struct stat statbuf;
+    if (stat(path.c_str(), &statbuf) != 0)
+        return false;
+    return S_ISREG(statbuf.st_mode);
+}
+
+// 获取目录中的所有文件
+vector<string> xfile_files_in_dir(const string& path, bool recursive = false) {
+    vector<string> ret;
+    DIR* dir = opendir(path.c_str());
+    if (!dir) {
+        cerr << "Error opening directory: " << path << endl;
+        return ret;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        string name = entry->d_name;
+        if (name == "." || name == "..")
+            continue;
+
+        string full_path = path + "/" + name;
+
+        if (is_regular_file(full_path)) {
+            ret.push_back(full_path);
+        } else if (recursive && is_directory(full_path)) {
+            auto subdir_files = xfile_files_in_dir(full_path, recursive);
+            ret.insert(ret.end(), subdir_files.begin(), subdir_files.end());
+        }
+    }
+
+    closedir(dir);
+    return ret;
+}
+
+// 获取目录中的所有子目录
+vector<string> xfile_dirs_in_dir(const string& path, bool recursive = false) {
+    vector<string> ret;
+    DIR* dir = opendir(path.c_str());
+    if (!dir) {
+        cerr << "Error opening directory: " << path << endl;
+        return ret;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        string name = entry->d_name;
+        if (name == "." || name == "..")
+            continue;
+
+        string full_path = path + "/" + name;
+
+        if (is_directory(full_path)) {
+            ret.push_back(full_path);
+            if (recursive) {
+                auto subdir_dirs = xfile_dirs_in_dir(full_path, recursive);
+                ret.insert(ret.end(), subdir_dirs.begin(), subdir_dirs.end());
+            }
+        }
+    }
+
+    closedir(dir);
+    return ret;
 }
 
