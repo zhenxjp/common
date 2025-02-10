@@ -138,13 +138,13 @@ public:
         XSAFE_CLOSE(fd_);
     }
 
-    idx_t get_blk_end(uint32_t file_no,uint32_t blk_no)
+    inline idx_t get_blk_end(uint32_t file_no,uint32_t blk_no)
     {
         XASSERT(file_no < index_.size());
         XASSERT(blk_no  < meta_.blk_cnt_max_);
         return index_[file_no][blk_no];
     }
-    idx_t get_blk_start(uint32_t file_no,uint32_t blk_no)
+    inline idx_t get_blk_start(uint32_t file_no,uint32_t blk_no)
     {
         XASSERT(file_no < index_.size());
         XASSERT(blk_no  < meta_.blk_cnt_max_);
@@ -197,7 +197,7 @@ public:
         return offset_array;
     }
 
-    uint64_t cnt() const
+    inline uint64_t cnt() const
     {
         uint64_t temp = cnt_;
         std::atomic_thread_fence(std::memory_order_acquire);
