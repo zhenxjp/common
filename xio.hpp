@@ -51,7 +51,7 @@ static io_idx* get_idx(const string &key,bool del = false)
     }
 }
 
-static void calc_iov_cnt(iovec *iov,uint32_t iov_cnt,uint32_t tot_len,
+static inline void calc_iov_cnt(iovec *iov,uint32_t iov_cnt,uint32_t tot_len,
                             uint32_t &iov_full_cnt,uint32_t &remain)
 {
     iov_full_cnt = 0;
@@ -158,7 +158,7 @@ public:
         written = 0;
 
         uint32_t blk_max = ctx_.meta_.blk_cnt_max_;
-        uint64_t w_cnt = idx_->cnt();
+        uint64_t w_cnt = idx_->w_get_cnt();
 
         uint32_t blk_no = w_cnt % blk_max;
         uint32_t file_no = w_cnt / blk_max;

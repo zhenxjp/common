@@ -140,14 +140,14 @@ public:
 
     inline idx_t get_blk_end(uint32_t file_no,uint32_t blk_no)
     {
-        XASSERT(file_no < index_.size());
-        XASSERT(blk_no  < meta_.blk_cnt_max_);
+        // XASSERT(file_no < index_.size());
+        // XASSERT(blk_no  < meta_.blk_cnt_max_);
         return index_[file_no][blk_no];
     }
     inline idx_t get_blk_start(uint32_t file_no,uint32_t blk_no)
     {
-        XASSERT(file_no < index_.size());
-        XASSERT(blk_no  < meta_.blk_cnt_max_);
+        // XASSERT(file_no < index_.size());
+        // XASSERT(blk_no  < meta_.blk_cnt_max_);
         if(0 == blk_no)
             return 0;
         return index_[file_no][blk_no-1];
@@ -157,9 +157,9 @@ public:
 
     int add_idx(iovec *iov,uint32_t cnt,uint32_t file_no,uint32_t blk_no)
     {
-        XASSERT(file_no < index_.size());
-        XASSERT(blk_no + cnt <= meta_.blk_cnt_max_);
-        XASSERT(-1 != fd_);
+        // XASSERT(file_no < index_.size());
+        // XASSERT(blk_no + cnt <= meta_.blk_cnt_max_);
+        // XASSERT(-1 != fd_);
 
         idx_t last_off = 0;
         if(blk_no > 0)
@@ -167,8 +167,8 @@ public:
 
         for (size_t i = 0; i < cnt; i++)
         {
-            index_[file_no][blk_no + i] = last_off + iov[i].iov_len;
             last_off += iov[i].iov_len;
+            index_[file_no][blk_no + i] = last_off;
         }
         xwrite(fd_,index_[file_no]+blk_no,cnt*IDX_LEN);
         std::atomic_thread_fence(std::memory_order_release);
@@ -202,6 +202,11 @@ public:
         uint64_t temp = cnt_;
         std::atomic_thread_fence(std::memory_order_acquire);
         return temp;
+    }
+
+    inline uint64_t w_get_cnt()const
+    {
+        return cnt_;
     }
 private:
     int read_idx_head(const io_meta& meta,const string &path)
