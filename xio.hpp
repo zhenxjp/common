@@ -24,17 +24,20 @@ struct io_context
     io_init_type init_type_ = io_init_type::init_new;// for write
 
     string path_ = "./io_save/";
-    string prefix_ = "io_save";
+    string prefix_ = "io_pre";
 };
 
 
 
-static io_idx* get_idx(const string &key)
+static io_idx* get_idx(const string &key,bool del = false)
 {
     static std::mutex lock;
     static std::map<string,io_idx*>    idx_map;
 
     std::lock_guard<std::mutex> l(lock);
+
+    if(del)
+        idx_map.erase(key);
 
     auto it = idx_map.find(key);
     if(it != idx_map.end())
@@ -165,7 +168,7 @@ public:
         // 需要新文件
         if(-1 == fds_[file_no])
         {
-            XASSERT(0 == blk_no);
+            // XASSERT(0 == blk_no);
             string path = data_pre() + std::to_string(file_no);
             fds_[file_no] =  open(path.c_str(),O_RDWR|O_CREAT|O_TRUNC,0666);
             CHECK_RETV(-1 != fds_[file_no],err_file_open_err);
