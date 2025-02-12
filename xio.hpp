@@ -27,8 +27,6 @@ struct io_context
     string prefix_ = "io_pre";
 };
 
-
-
 static io_idx* idx_op(const string &key,const string &op)
 {
     static std::mutex lock;
@@ -112,7 +110,6 @@ public:
             return init_read();
         }
         
-        
         return err_ok;
     }
     // 不许跨文件读
@@ -129,7 +126,6 @@ public:
 
         uint32_t blk_no = start_idx % blk_max;
         uint32_t file_no = start_idx / blk_max;
-
 
         cnt = std::min(blk_max - blk_no,cnt);// 不跨文件
         cnt = std::min(cur_cnt - start_idx,(uint64_t)cnt);// 不能超过最多大数量
@@ -236,8 +232,6 @@ private:
         max_file_cnt += 1000;
         fds_.resize(max_file_cnt,-1);
     }
-
-
 
     int init_write_exist()
     {

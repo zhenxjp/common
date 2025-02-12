@@ -170,7 +170,13 @@ public:
             last_off += iov[i].iov_len;
             index_[file_no][blk_no + i] = last_off;
         }
-        xwrite(fd_,index_[file_no]+blk_no,cnt*IDX_LEN);
+        auto wret = xwrite(fd_,index_[file_no]+blk_no,cnt*IDX_LEN);
+        if (cnt*IDX_LEN != wret)
+        {
+            printf("write idx error %u %ju\n",cnt*IDX_LEN,wret);
+            return err_file_write_err;
+        }
+
         std::atomic_thread_fence(std::memory_order_release);
         cnt_+=cnt;
         return err_ok;
@@ -248,6 +254,3 @@ private:
     int fd_ = -1;
     io_meta meta_;
 };
-
-
-
