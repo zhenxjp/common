@@ -7,5 +7,6 @@ enum xerrcode {
     err_file_open_err,
     err_data_err,
     err_file_write_err,
+    err_file_read_err,
     err_end
 };

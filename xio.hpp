@@ -118,7 +118,7 @@ public:
         readed = 0;
 
         auto cur_cnt = idx_->cnt();
-        if(cur_cnt <= start_idx)
+        if(cur_cnt <= start_idx || 0 == cnt)
             return err_ok;
 
 
@@ -150,6 +150,7 @@ public:
                 printf("xxx read war rret:%ld,readed:%u,remain:%u\n",rret,readed,remain);
         }else{
             printf("preadv errno=%u %s\n",errno,strerror(errno));
+            return err_file_read_err;
         }
 
         return err_ok;
