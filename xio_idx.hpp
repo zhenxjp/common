@@ -61,6 +61,14 @@ struct io_meta
         str += "blk_cnt_max_:" + to_string(blk_cnt_max_) + "\n";
         return str;
     }
+
+    int equal(const io_meta& meta)const
+    {
+        if(meta.io_type_ != io_type_ || meta.blk_size_ != blk_size_ || meta.blk_cnt_max_ != blk_cnt_max_)
+            return err_data_err;
+        else
+            return err_ok;
+    }
 };
 
 typedef uint32_t idx_t ;
@@ -237,17 +245,9 @@ private:
             return err_data_err;
         }
 
-        if(0 != memcmp(&meta_,&meta,META_LEN))
-        {
-            printf("load exist failed");
-            printf("real meta dump:\n%s\n",meta_.dump().c_str());
-            printf("init meta dump:\n%s\n",meta.dump().c_str());
-
-            return err_data_err;
-        }
         return err_ok;
     }
-private:
+public:
     uint64_t cnt_ = 0;                      // 已写索引数量
 
     std::vector<idx_t*> index_;

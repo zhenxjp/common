@@ -98,19 +98,14 @@ public:
         {
             if(io_init_type::init_new ==ctx_.init_type_)
             {
-                idx_ = idx_op(data_pre(),"get_new");
                 return init_write_new();
             }else
             {
-                idx_ = idx_op(data_pre(),"get_new");
                 return init_write_exist();
             }
         }else{
-            idx_ = idx_op(data_pre(),"get_exist");
             return init_read();
         }
-        
-        return err_ok;
     }
     // 不许跨文件读
     int read_data(iovec *iov,uint32_t cnt,uint32_t start_idx,uint32_t &readed)
@@ -221,6 +216,11 @@ public:
 private:
     int init_read()
     {
+        idx_ = idx_op(data_pre(),"get_exist");
+        XASSERT(nullptr != idx_);
+        int equal_ret = ctx_.meta_.equal(idx_->meta_);
+        CHECK0_RETV(equal_ret,err_data_err);
+
         return err_ok;
     }
 
@@ -236,13 +236,21 @@ private:
 
     int init_write_exist()
     {
+        idx_ = idx_op(data_pre(),"get_new");
+        XASSERT(nullptr != idx_);
         int idx_ret = idx_->load_exist(ctx_.meta_,idx_path());
         CHECK_RETV(0 == idx_ret,idx_ret);
+
+        int equal_ret = ctx_.meta_.equal(idx_->meta_);
+        CHECK0_RETV(equal_ret,err_data_err);
+
         return err_ok;
     }
 
     int init_write_new()
     {
+        idx_ = idx_op(data_pre(),"get_new");
+        XASSERT(nullptr != idx_);
         // 创建目录
         bool c_ret = xfile_create_foder(ctx_.path_);
         CHECK_RETV(c_ret,err_file_op);
