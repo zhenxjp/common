@@ -36,38 +36,54 @@
 #include <atomic> 
 #include <dirent.h>
 #include <sys/stat.h>
-//////////////////////////////
+#include "spdlog/spdlog.h"
 using namespace std;
 
-//////////////////////////////
-#define X_ARRAY_CNT(v)	(sizeof(v)/sizeof((v)[0]))
 //////////////////////////////
 typedef const char* c_t;
 typedef unsigned int ip_t;
 typedef unsigned short port_t;
-//////////////////////////////
+
 #define invalid_sock -1
 //////////////////////////////
+#define LOG_INFO    spdlog::info
+#define LOG_WARN    spdlog::warn
+#define LOG_ERROR   spdlog::error
+#define LOG_DEBUG   spdlog::debug
+#define LOG_CRITICAL spdlog::critical
+#define LOG_TRACE   spdlog::trace
 
-static bool _xxx_printf = true;
-#define X_P_INFO  \
-    if(_xxx_printf){\
-        printf("err!file:%s,line:%u,func:%s,last err=%u %s\n",\
-            __FILE__,__LINE__,__FUNCTION__,errno,strerror(errno));\
+//////////////////////////////
+
+#define CHECK_RETV(value, ret) \
+    if (0 == (value)) \
+    { \
+        LOG_ERROR("check err!file:{},line:{},func:{}\n", __FILE__, __LINE__, __FUNCTION__); \
+        return (ret); \
     }
-#define X_P_VAL(val)\
-    if(_xxx_printf){\
-        printf(#val"=%d \n",val);\
+
+#define CHECK_RET(value) \
+    if (0 == (value)) \
+    { \
+        LOG_ERROR("check err!file:{},line:{},func:{}\n", __FILE__, __LINE__, __FUNCTION__); \
+        return; \
     }
-	
-#define CHECK_RETV(value, ret) if (0 == (value)){X_P_INFO;return (ret);};
-#define CHECK_RET(value) if (0 == (value)){X_P_INFO;return ;};
 
-#define CHECK0_RETV(value, ret) if (0 != (value)){X_P_INFO;X_P_VAL(value);return (ret);};
+#define CHECK0_RETV(value, ret) \
+    if (0 != (value)) \
+    { \
+        LOG_ERROR("check err!file:{},line:{},func:{},val={}\n", __FILE__, __LINE__, __FUNCTION__, value); \
+        return (ret); \
+    }
 
-
-
-#define XASSERT(value)  if (0 == (value)){X_P_INFO;xexit(0);};
+#define XASSERT(value) \
+    if (0 == (value)) \
+    { \
+        LOG_ERROR("check err!file:{},line:{},func:{}\n", __FILE__, __LINE__, __FUNCTION__); \
+        xexit(0); \
+    }
+//////////////////////////////
+#define X_ARRAY_CNT(v)	(sizeof(v)/sizeof((v)[0]))
 
 #define XSAFE_DELETE(p) if(p){delete p;p=nullptr;}
 #define XSAFE_DELETE_ARRAY(p) if(p){delete [] p;p=nullptr;}
@@ -88,5 +104,6 @@ static uint32_t get_cur_tid()
 
 static void xexit(int code)
 {
+    LOG_ERROR("exit code=%d",code);
     exit(code);
 }

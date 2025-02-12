@@ -13,7 +13,7 @@ static ssize_t xwrite(int fd, const void *buf, size_t count) {
         if (nwritten < 0) {
             if (errno == EINTR) 
                 continue;
-            printf("write errno=%u %s\n",errno,strerror(errno));
+            LOG_ERROR("write errno={} {}", errno, strerror(errno));
             return totwritten ;
         }
 
@@ -35,7 +35,7 @@ static ssize_t xread(int fd, void *buf, size_t count) {
         if (nread < 0) {
             if (errno == EINTR) 
                 continue;
-            printf("read errno=%u %s\n",errno,strerror(errno));
+            LOG_ERROR("read errno={} {}", errno, strerror(errno));
             return totread;
         }
         if (nread == 0)
@@ -53,12 +53,12 @@ struct io_meta
     uint64_t io_type_ = 0;
     uint64_t blk_size_ = 1024;
     uint64_t blk_cnt_max_ = 1024;
-    string dump() const
+    std::string dump() const
     {
-        string str;
-        str += "io_type_:" + to_string(io_type_) + ",";
-        str += "blk_size_:" + to_string(blk_size_) + ",";
-        str += "blk_cnt_max_:" + to_string(blk_cnt_max_) + "\n";
+        std::string str;
+        str += "io_type_:" + std::to_string(io_type_) + ",";
+        str += "blk_size_:" + std::to_string(blk_size_) + ",";
+        str += "blk_cnt_max_:" + std::to_string(blk_cnt_max_) + "\n";
         return str;
     }
 
@@ -84,7 +84,7 @@ public:
     }
 
     // 加载已存在索引
-    int load_exist(const io_meta& meta,const string &path)
+    int load_exist(const io_meta& meta,const std::string &path)
     {
         int ret = read_idx_head(meta,path);
         if(err_ok != ret)
@@ -108,7 +108,7 @@ public:
             // 索引没读全，可能丢数据
             if(read_cnt * IDX_LEN != read_len)
             {
-                printf("read cnt not equal %ju %ju\n", read_cnt,read_len);
+                LOG_ERROR("read cnt not equal {} {}", read_cnt, read_len);
                 return err_data_err;
             }
             idx_cnt -= read_cnt;
@@ -119,7 +119,7 @@ public:
     }
 
 
-    int create_new(const io_meta& meta,const string &path)
+    int create_new(const io_meta& meta,const std::string &path)
     {
         release();
         meta_ = meta;
@@ -129,7 +129,7 @@ public:
         auto wret = xwrite(fd_,&meta_,META_LEN);
         if(META_LEN != wret)
         {
-            printf("write meta error %u %ju\n",META_LEN,wret);
+            LOG_ERROR("write meta error {} {}", META_LEN, wret);
             return err_file_write_err;
         }
         return err_ok;
@@ -161,8 +161,6 @@ public:
         return index_[file_no][blk_no-1];
     }
 
-    
-
     int add_idx(iovec *iov,uint32_t cnt,uint32_t file_no,uint32_t blk_no)
     {
         // XASSERT(file_no < index_.size());
@@ -181,7 +179,7 @@ public:
         auto wret = xwrite(fd_,index_[file_no]+blk_no,cnt*IDX_LEN);
         if (cnt*IDX_LEN != wret)
         {
-            printf("write idx error %u %ju\n",cnt*IDX_LEN,wret);
+            LOG_ERROR("write idx error {} {}", cnt*IDX_LEN, wret);
             return err_file_write_err;
         }
 
@@ -223,25 +221,25 @@ public:
         return cnt_;
     }
 private:
-    int read_idx_head(const io_meta& meta,const string &path)
+    int read_idx_head(const io_meta& meta,const std::string &path)
     {
         if(!xfile_exists(path))
         {
-            printf("read_idx_head idx file not exist:%s\n",path.c_str());
+            LOG_ERROR("read_idx_head idx file not exist: {}", path);
             return err_file_not_found;
         }
 
         fd_ = open(path.c_str(),O_RDWR);
         if(-1 == fd_)
         {
-            printf("read_idx_head open file %s error,errno=%u\n",path.c_str(),errno);
+            LOG_ERROR("read_idx_head open file {} error,errno={}", path, errno);
             return err_file_open_err;
         }
         
         ssize_t read_len = xread(fd_,&meta_,META_LEN);
         if(read_len != META_LEN )
         {
-            printf("load exist failed read len=%ju,ok=%u\n",read_len,META_LEN);
+            LOG_ERROR("load exist failed read len={},ok={}", read_len, META_LEN);
             return err_data_err;
         }
 

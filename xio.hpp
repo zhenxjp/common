@@ -23,14 +23,14 @@ struct io_context
     io_rw_type rw_type_ = io_rw_type::rw_write;
     io_init_type init_type_ = io_init_type::init_new;// for write
 
-    string path_ = "./io_save/";
-    string prefix_ = "io_pre";
+    std::string path_ = "./io_save/";
+    std::string prefix_ = "io_pre";
 };
 
-static io_idx* idx_op(const string &key,const string &op)
+static io_idx* idx_op(const std::string &key,const std::string &op)
 {
     static std::mutex lock;
-    static std::map<string,io_idx*>    idx_map;
+    static std::map<std::string,io_idx*>    idx_map;
 
     std::lock_guard<std::mutex> l(lock);
 
@@ -53,7 +53,7 @@ static io_idx* idx_op(const string &key,const string &op)
         XASSERT(it != idx_map.end());
         return it->second;
     }else{
-        printf("io_op_type err:%s\n",op.c_str());
+        LOG_ERROR("io_op_type err: {}", op);
         XASSERT(0);
         return nullptr;
     }
@@ -142,9 +142,9 @@ public:
             uint32_t remain = 0;
             calc_iov_cnt(iov,cnt,rret,readed,remain);
             if (0 != remain || cnt != readed)
-                printf("xxx read war rret:%ld,readed:%u,remain:%u\n",rret,readed,remain);
+                LOG_WARN("xxx read war rret: {}, readed: {}, remain: {}", rret, readed, remain);
         }else{
-            printf("preadv errno=%u %s\n",errno,strerror(errno));
+            LOG_ERROR("preadv errno={} {}", errno, strerror(errno));
             return err_file_read_err;
         }
 
@@ -153,11 +153,11 @@ public:
 
     int open_file(uint32_t file_no,int open_flags)
     {
-        string path = data_pre() + std::to_string(file_no);
+        std::string path = data_pre() + std::to_string(file_no);
         fds_[file_no] = open(path.c_str(),open_flags,0666);
         if(-1 == fds_[file_no])
         {
-            printf("open file errno=%u %s ,path=%s\n",errno,strerror(errno),path.c_str());
+            LOG_ERROR("open file errno={} {} ,path={}", errno, strerror(errno), path);
             return err_file_open_err;
         }
         return err_ok;
@@ -195,7 +195,7 @@ public:
             uint32_t remain = 0;
             calc_iov_cnt(iov, cnt, wret, written, remain);
             if (0 != remain || cnt != written)
-                printf("xxx write war wret:%ld,written:%u,remain:%u\n", wret, written, remain);
+                LOG_WARN("xxx write war wret: {}, written: {}, remain: {}", wret, written, remain);
 
             idx_->add_idx(iov, written, file_no, blk_no);
         }
@@ -256,26 +256,26 @@ private:
         CHECK_RETV(c_ret,err_file_op);
 
         // del old
-        string cmd = "rm -rf " + data_pre() + "*";
+        std::string cmd = "rm -rf " + data_pre() + "*";
         int sys_ret = system(cmd.c_str());
-        // printf("del cmd:%s ret=%d\n",cmd.c_str(),sys_ret);
+        // LOG_INFO("del cmd: {} ret={}", cmd, sys_ret);
         
         int idx_init = idx_->create_new(ctx_.meta_,idx_path());
         CHECK_RETV(0 == idx_init,idx_init);
         return err_ok;
     }
 
-    const string data_pre()
+    const std::string data_pre()
     {
         return ctx_.path_ + ctx_.prefix_ + ".";
     }
 
-    const string idx_path()
+    const std::string idx_path()
     {
         return ctx_.path_ + ctx_.prefix_ + ".index";
     }
 public:
-    vector<int>    fds_ ;
+    std::vector<int>    fds_ ;
 
     io_context ctx_;
     
