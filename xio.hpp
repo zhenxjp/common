@@ -29,26 +29,37 @@ struct io_context
 
 
 
-static io_idx* get_idx(const string &key,bool del = false)
+static io_idx* idx_op(const string &key,const string &op)
 {
     static std::mutex lock;
     static std::map<string,io_idx*>    idx_map;
 
     std::lock_guard<std::mutex> l(lock);
 
-    if(del)
-        idx_map.erase(key);
-
-    auto it = idx_map.find(key);
-    if(it != idx_map.end())
+    if("del" == op)
     {
-        return it->second;
-    }else{
+        idx_map.erase(key);
+        return nullptr;
+    }else if("get_new" == op)
+    {
+        auto it = idx_map.find(key);
+        XASSERT(it == idx_map.end());
+
         io_idx *idx = new (std::nothrow) io_idx();
         XASSERT(idx);
         idx_map.insert(std::make_pair(key,idx));
         return idx;
+    }else if("get_exist" == op)
+    {
+        auto it = idx_map.find(key);
+        XASSERT(it != idx_map.end());
+        return it->second;
+    }else{
+        printf("io_op_type err:%s\n",op.c_str());
+        XASSERT(0);
+        return nullptr;
     }
+
 }
 
 static inline void calc_iov_cnt(iovec *iov,uint32_t iov_cnt,uint32_t tot_len,
@@ -82,19 +93,22 @@ public:
     {
         ctx_ = ctx;
         xfile_fix_foder(ctx_.path_);
-        idx_ = get_idx(data_pre());
+        
 
         init_fd();
         if (io_rw_type::rw_write == ctx_.rw_type_)
         {
             if(io_init_type::init_new ==ctx_.init_type_)
             {
+                idx_ = idx_op(data_pre(),"get_new");
                 return init_write_new();
             }else
             {
+                idx_ = idx_op(data_pre(),"get_new");
                 return init_write_exist();
             }
         }else{
+            idx_ = idx_op(data_pre(),"get_exist");
             return init_read();
         }
         
@@ -125,13 +139,8 @@ public:
 
         if(-1 == fds_[file_no])
         {
-            string path = data_pre() + std::to_string(file_no);
-            fds_[file_no] = open(path.c_str(),O_RDWR);
-            if(-1 == fds_[file_no])
-            {
-                printf("open file errno=%u %s ,path=%s\n",errno,strerror(errno),path.c_str());
-                return err_file_open_err;
-            }
+            int open_ret = open_file(file_no,O_RDWR);
+            CHECK0_RETV(open_ret,open_ret);
         }
         
         uint32_t offset = idx_->get_blk_start(file_no,blk_no);
@@ -150,7 +159,17 @@ public:
         return err_ok;
     }
 
-
+    int open_file(uint32_t file_no,int open_flags)
+    {
+        string path = data_pre() + std::to_string(file_no);
+        fds_[file_no] = open(path.c_str(),open_flags,0666);
+        if(-1 == fds_[file_no])
+        {
+            printf("open file errno=%u %s ,path=%s\n",errno,strerror(errno),path.c_str());
+            return err_file_open_err;
+        }
+        return err_ok;
+    }
 
     // 不许跨文件写
     int write_data(iovec *iov,uint32_t cnt,uint32_t &written)
@@ -169,9 +188,8 @@ public:
         if(-1 == fds_[file_no])
         {
             // XASSERT(0 == blk_no);
-            string path = data_pre() + std::to_string(file_no);
-            fds_[file_no] =  open(path.c_str(),O_RDWR|O_CREAT|O_TRUNC,0666);
-            CHECK_RETV(-1 != fds_[file_no],err_file_open_err);
+            int open_ret = open_file(file_no,O_RDWR|O_CREAT);
+            CHECK0_RETV(open_ret,open_ret);
 
             idx_->create_idx_to_vec();
         }
