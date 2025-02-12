@@ -138,13 +138,13 @@ public:
         XSAFE_CLOSE(fd_);
     }
 
-    inline idx_t get_blk_end(uint32_t file_no,uint32_t blk_no)
+    inline idx_t get_blk_end(uint32_t file_no,uint32_t blk_no)const
     {
         // XASSERT(file_no < index_.size());
         // XASSERT(blk_no  < meta_.blk_cnt_max_);
         return index_[file_no][blk_no];
     }
-    inline idx_t get_blk_start(uint32_t file_no,uint32_t blk_no)
+    inline idx_t get_blk_start(uint32_t file_no,uint32_t blk_no)const
     {
         // XASSERT(file_no < index_.size());
         // XASSERT(blk_no  < meta_.blk_cnt_max_);
@@ -182,7 +182,7 @@ public:
         return err_ok;
     }
 
-    int fill_iov_len(iovec *iov,uint32_t cnt,uint32_t file_no,uint32_t blk_no)
+    int fill_iov_len(iovec *iov,uint32_t cnt,uint32_t file_no,uint32_t blk_no)const
     {
         XASSERT(file_no < index_.size());
         XASSERT(blk_no + cnt <= meta_.blk_cnt_max_);
