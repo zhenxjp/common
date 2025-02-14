@@ -1,52 +1,7 @@
 #pragma once
 #include "xcom.hpp"
 #include "xerrcode.hpp"
-
-
-static ssize_t xwrite(int fd, const void *buf, size_t count) {
-    const char *cbuf = (const char *)buf;
-    ssize_t nwritten = 0, totwritten = 0;
-
-    while(count) {
-        nwritten = write(fd, cbuf, count);
-
-        if (nwritten < 0) {
-            if (errno == EINTR) 
-                continue;
-            LOG_ERROR("write errno={} {}", errno, strerror(errno));
-            return totwritten ;
-        }
-
-        count -= nwritten;
-        cbuf += nwritten;
-        totwritten += nwritten;
-    }
-
-    return totwritten;
-}
-
-
-static ssize_t xread(int fd, void *buf, size_t count) {
-    char *cbuf = (char *)buf;
-    ssize_t nread = 0, totread = 0;
-    while(count) {
-        nread = read(fd, cbuf, count);
-
-        if (nread < 0) {
-            if (errno == EINTR) 
-                continue;
-            LOG_ERROR("read errno={} {}", errno, strerror(errno));
-            return totread;
-        }
-        if (nread == 0)
-            return totread;
-
-        count -= nread;
-        cbuf += nread;
-        totread += nread;
-    }
-    return totread;
-}
+#include "xfile.hpp"
 
 struct io_meta
 {

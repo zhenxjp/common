@@ -5,6 +5,8 @@
 #include <thread>
 #include <chrono>
 #include <set>
+#include <map>
+#include <mutex>
 
 #include <iostream>
 #include <fstream>
