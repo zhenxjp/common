@@ -53,20 +53,19 @@ class rb_iov_ntf : public rb_iov {
 public:
     int init_ee(xepoll *ee,ntf_cb_t cb)
     {
-        ntf.init(ee);
-        ntf.set_cb(cb);
-        ee->insert(EPOLLIN,&ntf);
+        ntf_.init(ee);
+        ntf_.set_cb(cb);
         return 0;
     }
 
     void writer_done_ntf(uint64_t cnt)
     {
         writer_done(cnt);
-        ntf.ntf();
+        ntf_.ntf();
     }
 
 private:
-    xntf_evt ntf;
+    xntf_evt ntf_;
 };
 
 
