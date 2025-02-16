@@ -99,6 +99,10 @@ public:
     {
         return r_idx_;
     }
+    inline uint64_t w_idx()const
+    {
+        return w_idx_;
+    }
 protected:
     volatile uint64_t w_idx_ = 0;
     char padding1_[64 - sizeof(uint64_t)];

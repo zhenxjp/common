@@ -73,7 +73,7 @@ private:
 // 读盘
 class xior_evt : public xevent {
 public:
-    int init(const io_context &ctx,rb_iov *rb,xepoll *ee)
+    int init(const io_context &ctx,rb_iov_ntf *rb,xepoll *ee)
     {
         ntf_.init(ee);
         io_.init(ctx);
@@ -85,9 +85,9 @@ public:
             iovec *iov= rb_->writer_get_blk(cnt);
 
             uint32_t readed = 0;
-            io_.read_data(iov,cnt,0,readed);
+            io_.read_data(iov,cnt,rb_->w_idx(),readed);
 
-            rb_->writer_done(readed);
+            rb_->writer_done_ntf(readed);
             ntf_.ntf();
         });
         ntf_.ntf();
@@ -97,7 +97,7 @@ public:
 
 private:
     io io_;
-    rb_iov *rb_;
+    rb_iov_ntf *rb_;
 
     xntf_evt ntf_;
 };
