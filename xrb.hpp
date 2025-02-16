@@ -20,14 +20,14 @@ class rb_base
 {
 public:
     
-    uint64_t get_unread_cnt()
+    inline uint64_t get_unread_cnt()const
     {
         uint64_t unread_cnt = w_idx_ - r_idx_;
         std::atomic_thread_fence(std::memory_order_acquire);
         return unread_cnt;
     }
 
-    uint64_t get_unread_cnt_tail()
+    inline uint64_t get_unread_cnt_tail()const
     {
         uint64_t unread_cnt = w_idx_ - r_idx_;
         uint64_t r_pos = w_idx_ & blk_mask_;
@@ -37,7 +37,7 @@ public:
         return std::min(tail_cnt, unread_cnt);
     }
 
-    uint64_t get_free_cnt()
+    inline uint64_t get_free_cnt()const
     {
         uint64_t unread_cnt = w_idx_ - r_idx_;
         uint64_t free_cnt = blk_cnt_ - unread_cnt;
@@ -46,7 +46,7 @@ public:
     }
 
     // 计算尾部以前的空闲空间
-    uint64_t get_free_cnt_tail()
+    inline uint64_t get_free_cnt_tail()const
     {
         uint64_t unread_cnt = w_idx_ - r_idx_;
         uint64_t free_cnt = blk_cnt_ - unread_cnt;
@@ -57,21 +57,21 @@ public:
         return std::min(tail_cnt, free_cnt);
     }
 
-    void writer_done(uint64_t cnt)
+    inline void writer_done(uint64_t cnt)
     {
+        if(0 == cnt)
+            return;
         std::atomic_thread_fence(std::memory_order_release);
         w_idx_ = w_idx_ + cnt;
-        print();
     }
 
-    void reader_done(uint64_t cnt)
+    inline void reader_done(uint64_t cnt)
     {
         std::atomic_thread_fence(std::memory_order_release);
         r_idx_ = r_idx_ + cnt;
-        print();
     }
 
-    void print()
+    void print()const
     {
         if(!print_change_)
             return ;
@@ -79,7 +79,7 @@ public:
         print_info();
     }
 
-    void print_info(const char *p = nullptr)
+    void print_info(const char *p = nullptr)const
     {
         if(p == nullptr)
             p = "";
@@ -95,7 +95,10 @@ public:
         blk_mask_ = blk_cnt - 1;
     }
     
-
+    inline uint64_t r_idx()const
+    {
+        return r_idx_;
+    }
 protected:
     volatile uint64_t w_idx_ = 0;
     char padding1_[64 - sizeof(uint64_t)];

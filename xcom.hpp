@@ -11,6 +11,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <functional>
+
 
 #include <string.h>
 #include <stdlib.h>
