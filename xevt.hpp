@@ -68,7 +68,7 @@ public:
         ntf_.ntf();
     }
 
-private:
+public:
     xntf_evt ntf_;
 };
 
@@ -114,15 +114,21 @@ public:
     {
         io_.init(ctx);
         rb_ = rb;
+        rb->init_ee(ee);
         rb_->set_cb([this](uint64_t val)
         {
             uint64_t cnt = 1024;
-            iovec *iov= rb_->writer_get_blk(cnt);
+            iovec *iov= rb_->reader_get_blk(cnt);
 
             uint32_t written = 0;
             io_.write_data(iov,cnt,written);
 
-            rb_->writer_done_ntf(written);
+            rb_->reader_done(written);
+            if(written <= cnt)
+            {
+                rb_->ntf_.ntf();
+            }
+            
         });
 
         return 0;
