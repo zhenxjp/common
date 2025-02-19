@@ -237,10 +237,13 @@ private:
 
     int init_write_exist()
     {
-        idx_ = idx_op(data_pre(),"get_new");
+        idx_ = new (std::nothrow) io_idx();
         XASSERT(nullptr != idx_);
+
         int idx_ret = idx_->load_exist(ctx_.meta_,idx_path());
         CHECK_RETV(0 == idx_ret,idx_ret);
+
+        idx_op(data_pre(),"get_new",idx_);
 
         int equal_ret = ctx_.meta_.equal(idx_->meta_);
         CHECK0_RETV(equal_ret,err_data_err);

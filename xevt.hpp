@@ -51,14 +51,9 @@ private:
 
 class rb_iov_ntf : public rb_iov {
 public:
-    int init_ee(xepoll *ee)
+    void set_cb(xepoll *ee,ntf_cb_t cb)
     {
         ntf_.init(ee);
-        return 0;
-    }
-
-    void set_cb(ntf_cb_t cb)
-    {
         ntf_.set_cb(cb);
     }
 
@@ -73,10 +68,22 @@ public:
 };
 
 
-// 读盘
-class xior_evt : public xevent {
+
+class xio_evt  {
 public:
     int init(const io_context &ctx,rb_iov_ntf *rb,xepoll *ee)
+    {
+        if(io_rw_type::rw_read == ctx.rw_type_)
+        {
+            return init_read(ctx,rb,ee);
+        }else if (io_rw_type::rw_write == ctx.rw_type_)
+        {
+            return init_write(ctx,rb,ee);
+        }
+        return err_data_err;
+    }
+private:
+    int init_read(const io_context &ctx,rb_iov_ntf *rb,xepoll *ee)
     {
         ntf_.init(ee);
         io_.init(ctx);
@@ -97,25 +104,11 @@ public:
 
         return 0;
     }
-
-private:
-    io io_;
-    rb_iov_ntf *rb_;
-
-    xntf_evt ntf_;
-};
-
-
-
-// 写盘
-class xiow_evt : public xevent {
-public:
-    int init(const io_context &ctx,rb_iov_ntf *rb,xepoll *ee)
+    int init_write(const io_context &ctx,rb_iov_ntf *rb,xepoll *ee)
     {
         io_.init(ctx);
         rb_ = rb;
-        rb->init_ee(ee);
-        rb_->set_cb([this](uint64_t val)
+        rb_->set_cb(ee,[this](uint64_t val)
         {
             uint64_t cnt = 1024;
             iovec *iov= rb_->reader_get_blk(cnt);
@@ -136,4 +129,6 @@ public:
 private:
     io io_;
     rb_iov_ntf *rb_;
+
+    xntf_evt ntf_;
 };

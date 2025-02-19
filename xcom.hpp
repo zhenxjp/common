@@ -108,6 +108,6 @@ static uint32_t get_cur_tid()
 
 static void xexit(int code)
 {
-    LOG_ERROR("exit code=%d",code);
+    LOG_ERROR("exit code={}",code);
     exit(code);
 }
