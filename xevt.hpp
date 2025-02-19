@@ -9,12 +9,9 @@ typedef std::function<void(uint64_t)> ntf_cb_t;
 class xntf_evt : public xevent {
 public:
     // 定义回调函数类型
-
-    int init(xepoll *ee)
+    xntf_evt()
     {
         efd_ = eventfd(0,0);
-        ee->insert(EPOLLIN,this);
-        return 0;
     }
 
     virtual int32_t get_fd()override
@@ -38,8 +35,9 @@ public:
         eventfd_write(efd_,1);
     }
 
-    void set_cb(ntf_cb_t cb)
+    void set_cb(xepoll *ee,ntf_cb_t cb)
     {
+        ee->insert(EPOLLIN,this);
         cb_ = cb;
     }
 
@@ -53,8 +51,7 @@ class rb_iov_ntf : public rb_iov {
 public:
     void set_cb(xepoll *ee,ntf_cb_t cb)
     {
-        ntf_.init(ee);
-        ntf_.set_cb(cb);
+        ntf_.set_cb(ee,cb);
     }
 
     void writer_done_ntf(uint64_t cnt)
@@ -85,20 +82,27 @@ public:
 private:
     int init_read(const io_context &ctx,rb_iov_ntf *rb,xepoll *ee)
     {
-        ntf_.init(ee);
         io_.init(ctx);
         rb_ = rb;
         
-        ntf_.set_cb([this](uint64_t val)
+        ntf_.set_cb(ee,[this](uint64_t val)
         {
+            ntf_.ntf();
+
             uint64_t cnt = 1024;
             iovec *iov= rb_->writer_get_blk(cnt);
+            if (0 == cnt)
+                return;
 
             uint32_t readed = 0;
             io_.read_data(iov,cnt,rb_->w_idx(),readed);
 
+            if(0 == readed)
+                return;
+
             rb_->writer_done_ntf(readed);
-            ntf_.ntf();
+            
+            //LOG_INFO("read all:{},readed:{}",rb_->w_idx(),readed);
         });
         ntf_.ntf();
 
@@ -106,17 +110,22 @@ private:
     }
     int init_write(const io_context &ctx,rb_iov_ntf *rb,xepoll *ee)
     {
-        io_.init(ctx);
+        int iret = io_.init(ctx);
+        XASSERT(iret == 0);
         rb_ = rb;
         rb_->set_cb(ee,[this](uint64_t val)
         {
             uint64_t cnt = 1024;
             iovec *iov= rb_->reader_get_blk(cnt);
+            if (0 == cnt)
+                return;
 
             uint32_t written = 0;
             io_.write_data(iov,cnt,written);
 
             rb_->reader_done(written);
+            //LOG_INFO("write all:{},written:{}",rb_->r_idx(),written);
+
             if(written <= cnt)
             {
                 rb_->ntf_.ntf();

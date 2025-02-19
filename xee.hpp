@@ -73,6 +73,7 @@ public:
 
     bool run(int timeout = -1)
     {
+        run_flag_ = true;
         thread_ = std::thread([this,timeout](){
             while(run_flag_){
                 ep_->wait(timeout);
