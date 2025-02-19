@@ -26,7 +26,9 @@ struct io_context
     std::string prefix_ = "io_pre";
 };
 
-static io_idx* idx_op(const std::string &key,const std::string &op)
+static io_idx* idx_op(const std::string &key,
+                        const std::string &op,
+                        io_idx *idx = nullptr)
 {
     static std::mutex lock;
     static std::map<std::string,io_idx*>    idx_map;
@@ -42,7 +44,7 @@ static io_idx* idx_op(const std::string &key,const std::string &op)
         auto it = idx_map.find(key);
         XASSERT(it == idx_map.end());
 
-        io_idx *idx = new (std::nothrow) io_idx();
+        // io_idx *idx = new (std::nothrow) io_idx();
         XASSERT(idx);
         idx_map.insert(std::make_pair(key,idx));
         return idx;
@@ -248,8 +250,6 @@ private:
 
     int init_write_new()
     {
-        idx_ = idx_op(data_pre(),"get_new");
-        XASSERT(nullptr != idx_);
         // 创建目录
         bool c_ret = xfile_create_foder(ctx_.path_);
         CHECK_RETV(c_ret,err_file_op);
@@ -259,8 +259,13 @@ private:
         int sys_ret = system(cmd.c_str());
         // LOG_INFO("del cmd: {} ret={}", cmd, sys_ret);
         
+        idx_ = new (std::nothrow) io_idx();
+        XASSERT(nullptr != idx_);
+
         int idx_init = idx_->create_new(ctx_.meta_,idx_path());
         CHECK_RETV(0 == idx_init,idx_init);
+
+        idx_op(data_pre(),"get_new",idx_);
         return err_ok;
     }
 
