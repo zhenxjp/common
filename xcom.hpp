@@ -59,32 +59,32 @@ typedef unsigned short port_t;
 
 //////////////////////////////
 
-#define CHECK_RETV(value, ret) \
-    if (0 == (value)) \
+#define CHECK_RETV(value_true, ret) \
+    if (0 == (value_true)) \
     { \
         LOG_ERROR("check err!file:{},line:{},func:{}\n", __FILE__, __LINE__, __FUNCTION__); \
         xexit(0,false); \
         return ret;\
     }
 
-#define CHECK_RET(value) \
-    if (0 == (value)) \
+#define CHECK_RET(value_true) \
+    if (0 == (value_true)) \
     { \
         LOG_ERROR("check err!file:{},line:{},func:{}\n", __FILE__, __LINE__, __FUNCTION__); \
         xexit(0,false); \
         return ;\
     }
 
-#define CHECK0_RETV(value, ret) \
-    if (0 != (value)) \
+#define CHECK0_RETV(value_0, ret) \
+    if (0 != (value_0)) \
     { \
-        LOG_ERROR("check err!file:{},line:{},func:{},val={}\n", __FILE__, __LINE__, __FUNCTION__, value); \
+        LOG_ERROR("check err!file:{},line:{},func:{},val={}\n", __FILE__, __LINE__, __FUNCTION__, value_0); \
         xexit(0,false); \
         return ret;\
     }
 
-#define XASSERT(value) \
-    if (0 == (value)) \
+#define XASSERT(value_true) \
+    if (0 == (value_true)) \
     { \
         LOG_ERROR("check err!file:{},line:{},func:{}\n", __FILE__, __LINE__, __FUNCTION__); \
         xexit(0); \
