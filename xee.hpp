@@ -62,3 +62,38 @@ public:
     int32_t epfd_{-1};
 };
 
+class epoll_thread {
+public:
+    bool init()
+    {
+        ep_ = new xepoll();
+        return ep_->init();
+        
+    }
+
+    bool run(int timeout = -1)
+    {
+        thread_ = std::thread([this,timeout](){
+            while(run_flag_){
+                ep_->wait(timeout);
+            }
+        });
+        return true;
+    }
+
+    void stop()
+    {
+        run_flag_ = false;
+        if(thread_.joinable())
+            thread_.join();
+    }
+
+    ~epoll_thread()
+    {
+        XSAFE_DELETE(ep_);
+    }
+public:
+    atomic<bool> run_flag_{false};
+    xepoll *ep_ = nullptr;
+    std::thread thread_;
+};
