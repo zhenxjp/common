@@ -113,6 +113,7 @@ public:
     {
         readed = 0;
 
+        cnt = std::min(cnt,uint32_t(IOV_MAX));
         auto cur_cnt = idx_->cnt();
         if(cur_cnt <= start_idx || 0 == cnt)
             return err_ok;
@@ -168,6 +169,7 @@ public:
     int write_data(iovec *iov,uint32_t cnt,uint32_t &written)
     {
         written = 0;
+        cnt = std::min(cnt,uint32_t(IOV_MAX) );
 
         uint32_t blk_max = ctx_.meta_.blk_cnt_max_;
         uint64_t w_cnt = idx_->w_get_cnt();
