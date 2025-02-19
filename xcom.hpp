@@ -63,21 +63,24 @@ typedef unsigned short port_t;
     if (0 == (value)) \
     { \
         LOG_ERROR("check err!file:{},line:{},func:{}\n", __FILE__, __LINE__, __FUNCTION__); \
-        return (ret); \
+        xexit(0,false); \
+        return ret;\
     }
 
 #define CHECK_RET(value) \
     if (0 == (value)) \
     { \
         LOG_ERROR("check err!file:{},line:{},func:{}\n", __FILE__, __LINE__, __FUNCTION__); \
-        return; \
+        xexit(0,false); \
+        return ;\
     }
 
 #define CHECK0_RETV(value, ret) \
     if (0 != (value)) \
     { \
         LOG_ERROR("check err!file:{},line:{},func:{},val={}\n", __FILE__, __LINE__, __FUNCTION__, value); \
-        return (ret); \
+        xexit(0,false); \
+        return ret;\
     }
 
 #define XASSERT(value) \
@@ -106,8 +109,9 @@ static uint32_t get_cur_tid()
     return ::syscall(SYS_gettid);
 }
 
-static void xexit(int code)
+static void xexit(int code,bool exit_pro = true)
 {
     LOG_ERROR("exit code={}",code);
-    exit(code);
+    if(exit_pro)
+        exit(code);
 }
