@@ -30,7 +30,7 @@ public:
     inline uint64_t get_unread_cnt_tail()const
     {
         uint64_t unread_cnt = w_idx_ - r_idx_;
-        uint64_t r_pos = w_idx_ & blk_mask_;
+        uint64_t r_pos = r_idx_ & blk_mask_;
         uint64_t tail_cnt = blk_cnt_ - r_pos;
         std::atomic_thread_fence(std::memory_order_acquire);
 
@@ -103,7 +103,7 @@ public:
     {
         return w_idx_;
     }
-protected:
+public:
     volatile uint64_t w_idx_ = 0;
     char padding1_[64 - sizeof(uint64_t)];
 
