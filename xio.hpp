@@ -239,7 +239,7 @@ private:
 
     int init_write_exist()
     {
-        idx_ = new (std::nothrow) io_idx();
+        idx_ = new (std::nothrow) io_idx(fds_.size());
         XASSERT(nullptr != idx_);
 
         int idx_ret = idx_->load_exist(ctx_.meta_,idx_path());
@@ -264,7 +264,7 @@ private:
         int sys_ret = system(cmd.c_str());
         // LOG_INFO("del cmd: {} ret={}", cmd, sys_ret);
         
-        idx_ = new (std::nothrow) io_idx();
+        idx_ = new (std::nothrow) io_idx(fds_.size());
         XASSERT(nullptr != idx_);
 
         int idx_init = idx_->create_new(ctx_.meta_,idx_path());

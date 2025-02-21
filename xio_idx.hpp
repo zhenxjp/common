@@ -33,6 +33,11 @@ const uint32_t META_LEN = sizeof(io_meta);
 class io_idx
 {
 public:
+    io_idx(int64_t sys_max_open_cnt)
+    {
+        XASSERT(sys_max_open_cnt > 0);
+        index_.reserve(sys_max_open_cnt);
+    }
     ~io_idx()
     {
         release();
